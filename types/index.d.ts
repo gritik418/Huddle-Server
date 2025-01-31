@@ -27,3 +27,20 @@ interface Chat {
   admins?: Types.ObjectId[];
   lastMessage?: string;
 }
+
+interface Message {
+  chatId: Types.ObjectId;
+  sender: Types.ObjectId;
+  content?: string;
+  attachment?: Attachment[];
+  sentAt?: Date;
+  readAt?: Date;
+  status: "sent" | "delivered" | "read" | "failed";
+}
+
+interface Attachment {
+  filename: string;
+  fileType?: string;
+  filePath: string;
+  size: number;
+}
