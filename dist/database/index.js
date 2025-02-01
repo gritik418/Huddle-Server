@@ -1,5 +1,4 @@
-import { connect } from "mongoose";
-
+export {};
 // const connectDB = async () => {
 //   try {
 //     const {} = connect();
