@@ -39,6 +39,7 @@ const UserSchema = new Schema({
     provider: {
         type: String,
         enum: ["credentials", "google"],
+        default: "credentials",
     },
     posts: [
         {

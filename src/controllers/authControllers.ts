@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import signupSchema, { SignupData } from "../validators/signupSchema.js";
 import User from "../models/User.js";
-import generateOTP from "../helpers/generateOTP.js";
+import generateOTP from "../utils/generateOTP.js";
 import bcrypt from "bcryptjs";
+import sendEmail from "../utils/sendEmail.js";
+import emailVerificationTemplate from "../email-templates/verification-email.js";
 
 export const userSignup = async (
   req: Request,
@@ -71,7 +73,13 @@ export const userSignup = async (
     });
     await user.save();
 
-    // TODO: Send the email to the user with OTP
+    await sendEmail(
+      verificationCode,
+      email,
+      "Verify Your Huddle Account",
+      `Welcome! Your verification code is: ${verificationCode}. Use this code to verify your Huddle account.`,
+      emailVerificationTemplate(verificationCode, firstName, lastName)
+    );
 
     return res.status(200).json({
       success: true,
@@ -79,6 +87,7 @@ export const userSignup = async (
         "Your account has been created! Check your email to verify your account.",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Unexpected server error. Please try again later.",
