@@ -4,6 +4,10 @@ import generateOTP from "../utils/generateOTP.js";
 import bcrypt from "bcryptjs";
 import sendEmail from "../utils/sendEmail.js";
 import emailVerificationTemplate from "../email-templates/verification-email.js";
+import loginSchema from "../validators/loginSchema.js";
+import { HUDDLE_TOKEN } from "../constants/variables.js";
+import { cookieOptions } from "../constants/options.js";
+import jwt from "jsonwebtoken";
 export const userSignup = async (req, res) => {
     try {
         const data = req.body;
@@ -59,14 +63,20 @@ export const userSignup = async (req, res) => {
             verificationCodeExpiry: Date.now() + 10 * 60 * 1000,
         });
         await user.save();
-        await sendEmail(verificationCode, email, "Verify Your Huddle Account", `Welcome! Your verification code is: ${verificationCode}. Use this code to verify your Huddle account.`, emailVerificationTemplate(verificationCode, firstName, lastName));
-        return res.status(200).json({
+        const mailOptions = {
+            from: "huddle@gmail.com",
+            to: email,
+            html: emailVerificationTemplate(verificationCode, firstName, lastName),
+            subject: `Welcome! Your verification code is: ${verificationCode}. Use this code to verify your Huddle account.`,
+            text: "Verify Your Huddle Account",
+        };
+        await sendEmail(mailOptions);
+        return res.status(201).json({
             success: true,
             message: "Your account has been created! Check your email to verify your account.",
         });
     }
     catch (error) {
-        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Unexpected server error. Please try again later.",
@@ -75,8 +85,51 @@ export const userSignup = async (req, res) => {
 };
 export const userLogin = async (req, res) => {
     try {
-        return res.status(200).json({
+        const data = req.body;
+        const result = loginSchema.safeParse(data);
+        if (!result.success) {
+            const errors = {};
+            result.error.errors.forEach((error) => {
+                errors[error.path[0]] = error.message;
+            });
+            return res.status(400).json({
+                success: false,
+                message: "Validation Error.",
+                errors,
+            });
+        }
+        const { identifier, password } = result.data;
+        const user = await User.findOne({
+            $or: [
+                {
+                    username: identifier,
+                },
+                {
+                    email: identifier,
+                },
+            ],
+            isVerified: true,
+            provider: "credentials",
+        }).select("password");
+        if (!user || !user.password)
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials.",
+            });
+        const verifyPassword = await bcrypt.compare(password, user.password);
+        if (!verifyPassword)
+            return res.status(401).json({
+                success: false,
+                message: "Invalid credentials.",
+            });
+        const payload = {
+            id: user._id,
+            email: user.email,
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        return res.status(200).cookie(HUDDLE_TOKEN, token, cookieOptions).json({
             success: true,
+            message: "Logged in successfully.",
         });
     }
     catch (error) {

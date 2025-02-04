@@ -8,14 +8,7 @@ const transporter = nodemailer.createTransport({
         pass: "erRU9g5Fju2q4pzSSr",
     },
 });
-const sendEmail = async (verificationCode, userEmail, subject, text, template) => {
-    const mailOptions = {
-        from: "huddle@gmail.com",
-        to: userEmail,
-        html: template,
-        subject,
-        text,
-    };
+const sendEmail = async (mailOptions) => {
     try {
         await new Promise((resolve, reject) => {
             transporter.sendMail(mailOptions, (error, info) => {

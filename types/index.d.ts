@@ -1,4 +1,5 @@
 interface User {
+  _id: Types.ObjectId;
   firstName: string;
   lastName?: string;
   username: string;
@@ -43,4 +44,9 @@ interface Attachment {
   fileType?: string;
   filePath: string;
   size: number;
+}
+
+interface JWT_Payload {
+  id: string;
+  email: string;
 }
