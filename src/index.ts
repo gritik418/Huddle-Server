@@ -4,18 +4,23 @@ import express from "express";
 import http from "http";
 import { corsOptions } from "./constants/options.js";
 import socketServer from "./socketServer.js";
+import connectDB from "./database/index.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 const server = http.createServer(app);
-const port = process.env.PORT;
+const PORT = process.env.PORT;
+
+connectDB();
+socketServer(server);
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-socketServer(server);
+app.use("/api/auth", authRoutes);
 
-server.listen(port, () => {
-  console.log(`App served at: http://localhost:${port}`);
+server.listen(PORT, () => {
+  console.log(`App served at: http://localhost:${PORT}`);
 });

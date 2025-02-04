@@ -27,7 +27,6 @@ const socketServer = (
       if (!token) return next(new Error("Authentication failed!"));
 
       socket.user = token;
-
       next();
     });
   });
