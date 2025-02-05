@@ -139,3 +139,49 @@ export const userLogin = async (req, res) => {
         });
     }
 };
+export const verifyEmail = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+        if (!user)
+            return res.status(401).json({
+                success: false,
+                message: "User not found.",
+            });
+        if (!user.verificationCode ||
+            !user.verificationCodeExpiry ||
+            new Date(user.verificationCodeExpiry).getTime() < new Date().getTime())
+            return res.status(401).json({
+                success: false,
+                message: "OTP Expired.",
+            });
+        const verifyOtp = await bcrypt.compare(otp, user.verificationCode);
+        if (!verifyOtp)
+            return res.status(401).json({
+                success: false,
+                message: "Invalid OTP.",
+            });
+        await User.findByIdAndUpdate(user._id, {
+            $set: {
+                verificationCode: null,
+                verificationCodeExpiry: null,
+                isVerified: true,
+            },
+        });
+        const payload = {
+            id: user._id,
+            email: user.email,
+        };
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        return res.status(200).cookie(HUDDLE_TOKEN, token, cookieOptions).json({
+            success: true,
+            message: "Email verified successfully!",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
