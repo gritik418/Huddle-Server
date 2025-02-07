@@ -47,13 +47,19 @@ const UserSchema = new Schema({
             ref: "Post",
         },
     ],
-    friendRequests: [
+    followRequests: [
         {
             type: Types.ObjectId,
             ref: "User",
         },
     ],
-    friends: [
+    followers: [
+        {
+            type: Types.ObjectId,
+            ref: "User",
+        },
+    ],
+    following: [
         {
             type: Types.ObjectId,
             ref: "User",

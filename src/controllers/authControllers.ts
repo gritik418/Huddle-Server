@@ -82,8 +82,8 @@ export const userSignup = async (
       from: "huddle@gmail.com",
       to: email,
       html: emailVerificationTemplate(verificationCode, firstName, lastName),
-      subject: `Welcome! Your verification code is: ${verificationCode}. Use this code to verify your Huddle account.`,
-      text: "Verify Your Huddle Account",
+      text: `Welcome! Your verification code is: ${verificationCode}. Use this code to verify your Huddle account.`,
+      subject: "Verify Your Huddle Account",
     };
     await sendEmail(mailOptions);
 
@@ -177,7 +177,7 @@ export const verifyEmail = async (
   try {
     const { email, otp } = req.body;
 
-    const user: User | null = await User.findOne({ email });
+    const user: User | null = await User.findOne({ email, isVerified: false });
     if (!user)
       return res.status(401).json({
         success: false,
@@ -188,18 +188,22 @@ export const verifyEmail = async (
       !user.verificationCode ||
       !user.verificationCodeExpiry ||
       new Date(user.verificationCodeExpiry).getTime() < new Date().getTime()
-    )
+    ) {
+      await User.findByIdAndDelete(user._id);
       return res.status(401).json({
         success: false,
         message: "OTP Expired.",
       });
+    }
 
     const verifyOtp: boolean = await bcrypt.compare(otp, user.verificationCode);
-    if (!verifyOtp)
+    if (!verifyOtp) {
+      await User.findByIdAndDelete(user._id);
       return res.status(401).json({
         success: false,
         message: "Invalid OTP.",
       });
+    }
 
     await User.findByIdAndUpdate(user._id, {
       $set: {

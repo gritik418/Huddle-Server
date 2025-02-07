@@ -10,8 +10,9 @@ interface User {
   isVerified: boolean;
   isActive: boolean;
   provider: "credentials" | "google";
-  friends: Types.ObjectId[];
-  friendRequests: Types.ObjectId[];
+  followers: Types.ObjectId[];
+  following: Types.ObjectId[];
+  followRequests: Types.ObjectId[];
   blockedUsers: Types.ObjectId[];
   posts: Types.ObjectId[];
   verificationCode?: string;
@@ -37,6 +38,12 @@ interface Message {
   sentAt?: Date;
   readAt?: Date;
   status: "sent" | "delivered" | "read" | "failed";
+}
+
+interface ChatRequest {
+  sender: Types.ObjectId;
+  receiver: Types.ObjectId;
+  status: "pending" | "accepted" | "rejected";
 }
 
 interface Attachment {

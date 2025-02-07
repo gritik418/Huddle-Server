@@ -2,10 +2,10 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
-    secure: false, // true for port 465, false for other ports
+    secure: false,
     auth: {
-        user: "dan.mayert@ethereal.email",
-        pass: "erRU9g5Fju2q4pzSSr",
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASSWORD,
     },
 });
 const sendEmail = async (mailOptions) => {
@@ -23,7 +23,6 @@ const sendEmail = async (mailOptions) => {
         return true;
     }
     catch (error) {
-        console.log("Error message:", error);
         return false;
     }
 };
