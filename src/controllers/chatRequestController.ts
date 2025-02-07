@@ -71,6 +71,35 @@ export const searchUsers = async (
   }
 };
 
+export const getChatRequests = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    const chatRequests: ChatRequest[] = await ChatRequest.find({
+      receiver: userId,
+      status: "pending",
+    });
+
+    return res.status(200).json({
+      success: true,
+      requests: chatRequests,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
 export const sendChatRequest = async (
   req: Request,
   res: Response
@@ -130,6 +159,74 @@ export const sendChatRequest = async (
     return res.status(200).json({
       success: true,
       message: "Chat request sent.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const acceptChatRequest = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const requestId: string = req.params.requestId;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!requestId)
+      return res.status(400).json({
+        success: false,
+        message: "Request Id is required.",
+      });
+
+    const chatRequest: ChatRequest | null = await ChatRequest.findById(
+      requestId
+    );
+    if (!chatRequest)
+      return res.status(400).json({
+        success: false,
+        message: "Chat request not found.",
+      });
+
+    if (chatRequest.receiver.toString() !== userId) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not the intended recipient of this request.",
+      });
+    }
+
+    const existingChat = await Chat.findOne({
+      isGroupChat: false,
+      members: { $all: [userId, chatRequest.sender] },
+    });
+    if (existingChat)
+      return res.status(400).json({
+        success: false,
+        message: "Chat already exists between you and this user.",
+      });
+
+    await ChatRequest.findByIdAndUpdate(requestId, {
+      $set: { status: "accepted" },
+    });
+
+    const chat = new Chat({
+      isGroupChat: false,
+      members: [userId, chatRequest.sender],
+    });
+    await chat.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Chat request accepted.",
     });
   } catch (error) {
     return res.status(500).json({
