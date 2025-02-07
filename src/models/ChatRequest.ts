@@ -1,4 +1,4 @@
-import { model, Model, models, Schema, Types } from "mongoose";
+import mongoose, { model, Model, Schema, Types } from "mongoose";
 
 const ChatRequestSchema = new Schema<ChatRequest>(
   {
@@ -22,6 +22,6 @@ const ChatRequestSchema = new Schema<ChatRequest>(
 );
 
 const ChatRequest: Model<ChatRequest> =
-  models.User || model("ChatRequest", ChatRequestSchema);
+  mongoose.models.ChatRequest || model("ChatRequest", ChatRequestSchema);
 
 export default ChatRequest;

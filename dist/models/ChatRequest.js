@@ -1,4 +1,4 @@
-import { model, models, Schema, Types } from "mongoose";
+import mongoose, { model, Schema, Types } from "mongoose";
 const ChatRequestSchema = new Schema({
     sender: {
         type: Types.ObjectId,
@@ -16,5 +16,5 @@ const ChatRequestSchema = new Schema({
         default: "pending",
     },
 }, { timestamps: true });
-const ChatRequest = models.User || model("ChatRequest", ChatRequestSchema);
+const ChatRequest = mongoose.models.ChatRequest || model("ChatRequest", ChatRequestSchema);
 export default ChatRequest;

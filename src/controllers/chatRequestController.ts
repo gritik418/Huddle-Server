@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
+import ChatRequest from "../models/ChatRequest.js";
 
 export const searchUsers = async (
   req: Request,
@@ -46,6 +47,7 @@ export const searchUsers = async (
           firstName: { $regex: searchQuery, $options: "i" },
         },
       ],
+      isVerified: true,
     }).select({
       _id: 1,
       email: 1,
@@ -60,6 +62,74 @@ export const searchUsers = async (
     return res.status(200).json({
       success: true,
       users,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const sendChatRequest = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const { receiverId } = req.body;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!receiverId)
+      return res.status(400).json({
+        success: false,
+        message: "Receiver Id is required.",
+      });
+
+    const receiver: User | null = await User.findById(receiverId);
+    if (!receiver)
+      return res.status(400).json({
+        success: false,
+        message: "User not found.",
+      });
+
+    const existingChat = await Chat.findOne({
+      isGroupChat: false,
+      members: { $all: [userId, receiverId] },
+    });
+
+    if (existingChat)
+      return res.status(400).json({
+        success: false,
+        message: "Chat already exists between you and this user.",
+      });
+
+    const existingRequest = await ChatRequest.findOne({
+      sender: userId,
+      receiver: receiverId,
+      status: "pending",
+    });
+    if (existingRequest)
+      return res.status(400).json({
+        success: false,
+        message: "You already have a pending chat request with this user.",
+      });
+
+    const chatRequest = new ChatRequest({
+      receiver: receiverId,
+      sender: userId,
+      status: "pending",
+    });
+    await chatRequest.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Chat request sent.",
     });
   } catch (error) {
     return res.status(500).json({
