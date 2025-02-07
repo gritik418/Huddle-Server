@@ -10,6 +10,7 @@ import socketServer from "./socketServer.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
+import messageRoutes from "./routes/message.routes.js";
 import chatRequestRoutes from "./routes/chat-request.routes.js";
 
 const app = express();
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/message", messageRoutes);
 app.use("/api/chat-requests", chatRequestRoutes);
 
 server.listen(PORT, () => {
