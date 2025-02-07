@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   acceptChatRequest,
+  declineChatRequest,
   getChatRequests,
   searchUsers,
   sendChatRequest,
@@ -17,6 +18,6 @@ router.post("/", authenticate, sendChatRequest);
 
 router.put("/:requestId/accept", authenticate, acceptChatRequest);
 
-router.put("/:requestId/decline");
+router.put("/:requestId/decline", authenticate, declineChatRequest);
 
 export default router;

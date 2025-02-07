@@ -5,15 +5,15 @@ export const searchUsers = async (req, res) => {
     try {
         const userId = req.params.userId;
         const searchQuery = req.query["q"]?.toString();
-        if (!searchQuery || searchQuery.length < 3)
-            return res.status(200).json({
-                success: true,
-                message: "Please enter at least 3 characters to start your search.",
-            });
         if (!userId)
             return res.status(401).json({
                 success: false,
                 message: "Please Login.",
+            });
+        if (!searchQuery || searchQuery.length < 3)
+            return res.status(200).json({
+                success: true,
+                message: "Please enter at least 3 characters to start your search.",
             });
         const chats = await Chat.find({
             isGroupChat: false,
@@ -42,11 +42,6 @@ export const searchUsers = async (req, res) => {
             _id: 1,
             email: 1,
         });
-        if (users.length === 0)
-            return res.status(200).json({
-                success: true,
-                message: "No users match your search criteria.",
-            });
         return res.status(200).json({
             success: true,
             users,
