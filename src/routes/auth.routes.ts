@@ -3,7 +3,7 @@ import {
   userLogin,
   userSignup,
   verifyEmail,
-} from "../controllers/authControllers.js";
+} from "../controllers/authController.js";
 
 const router = Router();
 

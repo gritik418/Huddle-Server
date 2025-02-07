@@ -133,7 +133,7 @@ export const userLogin = async (
       ],
       isVerified: true,
       provider: "credentials",
-    }).select("password");
+    }).select("password email");
 
     if (!user || !user.password)
       return res.status(401).json({
