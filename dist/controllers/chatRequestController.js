@@ -170,11 +170,13 @@ export const acceptChatRequest = async (req, res) => {
             isGroupChat: false,
             members: { $all: [userId, chatRequest.sender] },
         });
-        if (existingChat)
+        if (existingChat) {
+            await ChatRequest.findByIdAndDelete(requestId);
             return res.status(400).json({
                 success: false,
                 message: "Chat already exists between you and this user.",
             });
+        }
         await ChatRequest.findByIdAndUpdate(requestId, {
             $set: { status: "accepted" },
         });
@@ -186,6 +188,58 @@ export const acceptChatRequest = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Chat request accepted.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const declineChatRequest = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const requestId = req.params.requestId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        if (!requestId)
+            return res.status(400).json({
+                success: false,
+                message: "Request Id is required.",
+            });
+        const chatRequest = await ChatRequest.findById(requestId);
+        if (!chatRequest)
+            return res.status(400).json({
+                success: false,
+                message: "Chat request not found.",
+            });
+        if (chatRequest.receiver.toString() !== userId) {
+            return res.status(400).json({
+                success: false,
+                message: "You are not the intended recipient of this request.",
+            });
+        }
+        const existingChat = await Chat.findOne({
+            isGroupChat: false,
+            members: { $all: [userId, chatRequest.sender] },
+        });
+        if (existingChat) {
+            await ChatRequest.findByIdAndDelete(requestId);
+            return res.status(400).json({
+                success: false,
+                message: "Chat already exists between you and this user.",
+            });
+        }
+        await ChatRequest.findByIdAndUpdate(requestId, {
+            $set: { status: "rejected" },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Chat request rejected.",
         });
     }
     catch (error) {
