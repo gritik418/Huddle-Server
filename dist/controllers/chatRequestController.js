@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import Chat from "../models/Chat.js";
 import ChatRequest from "../models/ChatRequest.js";
+import { SocketEventEmitter } from "../socket/socketServer.js";
+import { NEW_CHAT_REQUEST } from "../constants/events.js";
 export const searchUsers = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -40,8 +42,17 @@ export const searchUsers = async (req, res) => {
             isVerified: true,
         }).select({
             _id: 1,
-            email: 1,
+            username: 1,
+            profilePicture: 1,
+            firstName: 1,
+            lastName: 1,
         });
+        if (users.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "We couldn't find any matching users.",
+            });
+        }
         return res.status(200).json({
             success: true,
             users,
@@ -65,7 +76,13 @@ export const getChatRequests = async (req, res) => {
         const chatRequests = await ChatRequest.find({
             receiver: userId,
             status: "pending",
-        });
+        }).populate("sender", "_id firstName lastName username profilePicture");
+        if (chatRequests.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No chat requests at the moment.",
+            });
+        }
         return res.status(200).json({
             success: true,
             requests: chatRequests,
@@ -123,6 +140,7 @@ export const sendChatRequest = async (req, res) => {
             status: "pending",
         });
         await chatRequest.save();
+        SocketEventEmitter.emit(NEW_CHAT_REQUEST, { chatRequest });
         return res.status(200).json({
             success: true,
             message: "Chat request sent.",

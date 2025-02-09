@@ -15,7 +15,7 @@ export const getChats = async (
 
     const chats: Chat[] = await Chat.find({
       members: { $in: [userId] },
-    });
+    }).populate("members", "_id firstName lastName username profilePicture");
 
     return res.status(200).json({
       success: true,

@@ -6,7 +6,7 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import { corsOptions } from "./constants/options.js";
 import connectDB from "./database/index.js";
-import socketServer from "./socketServer.js";
+import socketServer from "./socket/socketServer.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import chatRoutes from "./routes/chat.routes.js";

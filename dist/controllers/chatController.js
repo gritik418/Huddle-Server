@@ -9,7 +9,7 @@ export const getChats = async (req, res) => {
             });
         const chats = await Chat.find({
             members: { $in: [userId] },
-        });
+        }).populate("members", "_id firstName lastName username profilePicture");
         return res.status(200).json({
             success: true,
             chats,
