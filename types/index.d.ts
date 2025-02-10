@@ -22,6 +22,7 @@ interface User {
 }
 
 interface Chat {
+  _id: string;
   isGroupChat: boolean;
   groupName?: string;
   groupIcon?: string;
@@ -31,6 +32,7 @@ interface Chat {
 }
 
 interface Message {
+  _id: string;
   chatId: Types.ObjectId;
   sender: Types.ObjectId;
   content?: string;

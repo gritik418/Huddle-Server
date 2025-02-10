@@ -6,8 +6,9 @@ import { HUDDLE_TOKEN } from "../constants/variables.js";
 import { Request, Response } from "express";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
-import { NEW_CHAT_REQUEST } from "../constants/events.js";
+import { NEW_CHAT_REQUEST, SEND_MESSAGE } from "../constants/events.js";
 import { newChatRequestHandler } from "./handlers/chatHandler.js";
+import { sendMessageHandler } from "./handlers/messageHandler.js";
 
 export const SocketEventEmitter = new EventEmitter();
 export const ConnectedUsers = new Map<string, string>();
@@ -52,10 +53,21 @@ const socketServer = (
   io.on("connection", (socket: Socket) => {
     ConnectedUsers.set(socket.user.id, socket.id);
 
+    socket.on("reconnect", () => {
+      ConnectedUsers.set(socket.user.id, socket.id);
+    });
+
     SocketEventEmitter.on(
       NEW_CHAT_REQUEST,
       ({ chatRequest }: { chatRequest: ChatRequest }) =>
         newChatRequestHandler(socket, chatRequest)
+    );
+
+    socket.on(
+      SEND_MESSAGE,
+      async ({ message, chat }: { message: Message; chat: Chat }) => {
+        await sendMessageHandler(socket, message, chat);
+      }
     );
 
     socket.on("disconnect", () => {

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
+import { HUDDLE_TOKEN } from "../constants/variables.js";
+import { cookieOptions } from "../constants/options.js";
 
 export const getUser = async (
   req: Request,
@@ -7,11 +9,12 @@ export const getUser = async (
 ): Promise<Response> => {
   try {
     const userId: string = req.params.userId;
-    if (!userId)
-      return res.status(401).json({
+    if (!userId) {
+      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
         success: false,
         message: "Please Login.",
       });
+    }
 
     const user: User | null = await User.findById(userId).select({
       followRequests: 1,
@@ -27,6 +30,13 @@ export const getUser = async (
       friends: 1,
       blockedUsers: 1,
     });
+
+    if (!user || !user._id) {
+      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
