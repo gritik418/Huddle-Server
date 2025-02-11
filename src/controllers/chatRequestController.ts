@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import User from "../models/User.js";
+import { SOCKET_NEW_CHAT_REQUEST } from "../constants/events.js";
 import Chat from "../models/Chat.js";
 import ChatRequest from "../models/ChatRequest.js";
+import User from "../models/User.js";
 import { SocketEventEmitter } from "../socket/socketServer.js";
-import { NEW_CHAT_REQUEST } from "../constants/events.js";
 
 export const searchUsers = async (
   req: Request,
@@ -167,9 +167,11 @@ export const sendChatRequest = async (
       sender: userId,
       status: "pending",
     });
-    await chatRequest.save();
+    const savedChatRequest = await chatRequest.save();
 
-    SocketEventEmitter.emit(NEW_CHAT_REQUEST, { chatRequest });
+    SocketEventEmitter.emit(SOCKET_NEW_CHAT_REQUEST, {
+      chatRequest: savedChatRequest,
+    });
 
     return res.status(200).json({
       success: true,

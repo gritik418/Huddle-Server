@@ -17,7 +17,7 @@ export const getMessages = async (
 
     const messages: Message[] = await Message.find({
       chatId,
-    });
+    }).populate("sender", "_id firstName lastName username profilePicture");
 
     return res.status(200).json({
       success: true,

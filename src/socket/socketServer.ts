@@ -6,12 +6,17 @@ import { HUDDLE_TOKEN } from "../constants/variables.js";
 import { Request, Response } from "express";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
-import { NEW_CHAT_REQUEST, SEND_MESSAGE } from "../constants/events.js";
-import { newChatRequestHandler } from "./handlers/chatHandler.js";
+import {
+  NEW_CHAT_REQUEST,
+  SEND_MESSAGE,
+  SOCKET_NEW_CHAT_REQUEST,
+} from "../constants/events.js";
+import { newChatRequestHandler } from "./handlers/chatRequestHandler.js";
 import { sendMessageHandler } from "./handlers/messageHandler.js";
+import User from "../models/User.js";
 
 export const SocketEventEmitter = new EventEmitter();
-export const ConnectedUsers = new Map<string, string>();
+export const ConnectedUsers = new Map<string, Socket>();
 
 const socketServer = (
   httpServer: http.Server<
@@ -45,28 +50,45 @@ const socketServer = (
           message: "Authentication failed!",
         });
 
-      socket.user = { id: verify.id };
+      const user: User = await User.findById(verify.id).select({
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        username: 1,
+        profilePicture: 1,
+      });
+
+      socket.user = {
+        id: user._id.toString(),
+        firstName: user.firstName,
+        lastName: user.lastName || "",
+        username: user.username,
+        profilePicture: user.profilePicture || "",
+      };
       next();
     });
   });
 
   io.on("connection", (socket: Socket) => {
-    ConnectedUsers.set(socket.user.id, socket.id);
+    ConnectedUsers.set(socket.user.id, socket);
 
     socket.on("reconnect", () => {
-      ConnectedUsers.set(socket.user.id, socket.id);
+      ConnectedUsers.set(socket.user.id, socket);
     });
-
-    SocketEventEmitter.on(
-      NEW_CHAT_REQUEST,
-      ({ chatRequest }: { chatRequest: ChatRequest }) =>
-        newChatRequestHandler(socket, chatRequest)
-    );
 
     socket.on(
       SEND_MESSAGE,
       async ({ message, chat }: { message: Message; chat: Chat }) => {
-        await sendMessageHandler(socket, message, chat);
+        await sendMessageHandler(io, socket, message, chat);
+      }
+    );
+
+    SocketEventEmitter.on(
+      SOCKET_NEW_CHAT_REQUEST,
+      ({ chatRequest }: { chatRequest: ChatRequest }) => {
+        if (chatRequest.sender.toString() === socket.user.id) {
+          newChatRequestHandler(io, socket, chatRequest);
+        }
       }
     );
 
