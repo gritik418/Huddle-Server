@@ -1,8 +1,8 @@
-import { SOCKET_NEW_CHAT_REQUEST } from "../constants/events.js";
+import { NEW_CHAT_REQUEST } from "../constants/events.js";
 import Chat from "../models/Chat.js";
 import ChatRequest from "../models/ChatRequest.js";
 import User from "../models/User.js";
-import { SocketEventEmitter } from "../socket/socketServer.js";
+import { ConnectedUsers } from "../socket/socketServer.js";
 export const searchUsers = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -140,9 +140,25 @@ export const sendChatRequest = async (req, res) => {
             status: "pending",
         });
         const savedChatRequest = await chatRequest.save();
-        SocketEventEmitter.emit(SOCKET_NEW_CHAT_REQUEST, {
-            chatRequest: savedChatRequest,
-        });
+        const receiverSocket = ConnectedUsers.get(receiver._id.toString());
+        if (receiverSocket && receiverSocket?.id) {
+            const user = await User.findById(userId);
+            const modifiedChatRequest = {
+                receiver: savedChatRequest.receiver,
+                status: savedChatRequest.status,
+                _id: savedChatRequest._id,
+                sender: {
+                    _id: user?._id.toString(),
+                    firstName: user?.firstName,
+                    lastName: user?.lastName,
+                    username: user?.username,
+                    profilePicture: user?.profilePicture,
+                },
+            };
+            receiverSocket.emit(NEW_CHAT_REQUEST, {
+                chatRequest: modifiedChatRequest,
+            });
+        }
         return res.status(200).json({
             success: true,
             message: "Chat request sent.",

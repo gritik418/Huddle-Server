@@ -4,8 +4,7 @@ import { corsOptions } from "../constants/options.js";
 import { HUDDLE_TOKEN } from "../constants/variables.js";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
-import { SEND_MESSAGE, SOCKET_NEW_CHAT_REQUEST, } from "../constants/events.js";
-import { newChatRequestHandler } from "./handlers/chatRequestHandler.js";
+import { SEND_MESSAGE } from "../constants/events.js";
 import { sendMessageHandler } from "./handlers/messageHandler.js";
 import User from "../models/User.js";
 export const SocketEventEmitter = new EventEmitter();
@@ -14,6 +13,9 @@ const socketServer = (httpServer) => {
     const io = new Server(httpServer, {
         cors: corsOptions,
         transports: ["websocket"],
+        allowEIO3: true,
+        allowUpgrades: true,
+        pingTimeout: 1000,
     });
     io.use((socket, next) => {
         const req = socket.request;
@@ -54,11 +56,6 @@ const socketServer = (httpServer) => {
         });
         socket.on(SEND_MESSAGE, async ({ message, chat }) => {
             await sendMessageHandler(io, socket, message, chat);
-        });
-        SocketEventEmitter.on(SOCKET_NEW_CHAT_REQUEST, ({ chatRequest }) => {
-            if (chatRequest.sender.toString() === socket.user.id) {
-                newChatRequestHandler(io, socket, chatRequest);
-            }
         });
         socket.on("disconnect", () => {
             ConnectedUsers.delete(socket.user.id);

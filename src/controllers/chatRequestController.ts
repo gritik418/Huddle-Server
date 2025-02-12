@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { SOCKET_NEW_CHAT_REQUEST } from "../constants/events.js";
+import { NEW_CHAT_REQUEST } from "../constants/events.js";
 import Chat from "../models/Chat.js";
 import ChatRequest from "../models/ChatRequest.js";
 import User from "../models/User.js";
-import { SocketEventEmitter } from "../socket/socketServer.js";
+import { ConnectedUsers } from "../socket/socketServer.js";
+import { Socket } from "socket.io";
 
 export const searchUsers = async (
   req: Request,
@@ -169,9 +170,29 @@ export const sendChatRequest = async (
     });
     const savedChatRequest = await chatRequest.save();
 
-    SocketEventEmitter.emit(SOCKET_NEW_CHAT_REQUEST, {
-      chatRequest: savedChatRequest,
-    });
+    const receiverSocket: Socket | undefined = ConnectedUsers.get(
+      receiver._id.toString()
+    );
+    if (receiverSocket && receiverSocket?.id) {
+      const user: User | null = await User.findById(userId);
+
+      const modifiedChatRequest = {
+        receiver: savedChatRequest.receiver,
+        status: savedChatRequest.status,
+        _id: savedChatRequest._id,
+        sender: {
+          _id: user?._id.toString(),
+          firstName: user?.firstName,
+          lastName: user?.lastName,
+          username: user?.username,
+          profilePicture: user?.profilePicture,
+        },
+      };
+
+      receiverSocket.emit(NEW_CHAT_REQUEST, {
+        chatRequest: modifiedChatRequest,
+      });
+    }
 
     return res.status(200).json({
       success: true,

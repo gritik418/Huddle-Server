@@ -6,12 +6,7 @@ import { HUDDLE_TOKEN } from "../constants/variables.js";
 import { Request, Response } from "express";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
-import {
-  NEW_CHAT_REQUEST,
-  SEND_MESSAGE,
-  SOCKET_NEW_CHAT_REQUEST,
-} from "../constants/events.js";
-import { newChatRequestHandler } from "./handlers/chatRequestHandler.js";
+import { SEND_MESSAGE } from "../constants/events.js";
 import { sendMessageHandler } from "./handlers/messageHandler.js";
 import User from "../models/User.js";
 
@@ -27,6 +22,9 @@ const socketServer = (
   const io = new Server(httpServer, {
     cors: corsOptions,
     transports: ["websocket"],
+    allowEIO3: true,
+    allowUpgrades: true,
+    pingTimeout: 1000,
   });
 
   io.use((socket: Socket, next) => {
@@ -80,15 +78,6 @@ const socketServer = (
       SEND_MESSAGE,
       async ({ message, chat }: { message: Message; chat: Chat }) => {
         await sendMessageHandler(io, socket, message, chat);
-      }
-    );
-
-    SocketEventEmitter.on(
-      SOCKET_NEW_CHAT_REQUEST,
-      ({ chatRequest }: { chatRequest: ChatRequest }) => {
-        if (chatRequest.sender.toString() === socket.user.id) {
-          newChatRequestHandler(io, socket, chatRequest);
-        }
       }
     );
 
