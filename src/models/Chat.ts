@@ -31,6 +31,24 @@ const ChatSchema = new Schema<Chat>(
     lastMessage: {
       type: String,
     },
+    groupStatus: {
+      type: String,
+      enum: ["active", "deleted"],
+      default: "active",
+    },
+    deletedAt: {
+      type: Date,
+    },
+    deletedBy: {
+      type: Types.ObjectId,
+      ref: "User",
+    },
+    deletedFor: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -30,6 +30,10 @@ interface Chat {
   members: Types.ObjectId[];
   admins?: Types.ObjectId[];
   lastMessage?: string;
+  groupStatus?: "active" | "deleted";
+  deletedAt?: Date;
+  deletedBy?: Types.ObjectId;
+  deletedFor: Types.ObjectId[];
 }
 
 interface Message {

@@ -6,12 +6,12 @@ const groupSchema = z
       .string()
       .min(1, "Group Name is required.")
       .min(3, "Group Name must be at least 3 characters long.")
-      .min(20, "Group Name can't exceed 20 characters."),
+      .max(20, "Group Name can't exceed 20 characters."),
     groupDescription: z
       .string()
       .min(1, "Group Name is required.")
       .min(3, "Group Name must be at least 3 characters long.")
-      .min(200, "Group Name can't exceed 200 characters."),
+      .max(200, "Group Name can't exceed 200 characters."),
     members: z
       .array(z.string().min(1, "Members are required."))
       .min(2, "There must be at least two members."),

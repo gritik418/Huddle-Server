@@ -11,13 +11,14 @@ export const getGroupById = async (
   res: Response
 ): Promise<Response> => {
   try {
+    const userId: string = req.params.userId;
     const groupId: string = req.params.groupId;
 
     const group: Chat | null = await Chat.findById(groupId)
       .populate("members", "_id firstName lastName username profilePicture")
       .populate("admins", "_id firstName lastName username profilePicture");
 
-    if (!group)
+    if (!group || group.deletedFor.includes(userId))
       return res.status(400).json({
         success: false,
         message: "Group doesn't exists.",
@@ -64,6 +65,7 @@ export const createGroup = async (
       groupDescription,
       members: [...members, userId],
       admins: [...admins, userId],
+      groupStatus: "active",
     });
 
     const savedGroup = await newGroup.save();
@@ -89,6 +91,60 @@ export const createGroup = async (
     return res.status(200).json({
       success: true,
       message: "Group created.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const deleteGroup = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const groupId: string = req.params.groupId;
+
+    const group: Chat | null = await Chat.findById(groupId);
+
+    if (!group)
+      return res.status(400).json({
+        success: false,
+        message: "Group doesn't exists.",
+      });
+
+    const isAdmin: boolean = group.admins?.find(
+      (admin: string) => admin.toString() === userId
+    );
+
+    if (!isAdmin)
+      return res.status(401).json({
+        success: false,
+        message: "Only Group Admin can delete the group.",
+      });
+
+    if (group.groupStatus === "deleted") {
+      return res.status(400).json({
+        success: false,
+        message: "Group has already been deleted.",
+      });
+    }
+
+    await Chat.findByIdAndUpdate(groupId, {
+      $set: {
+        deletedAt: Date.now(),
+        deletedBy: userId,
+        groupStatus: "deleted",
+      },
+      $push: { deletedFor: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Group deleted successfully.",
     });
   } catch (error) {
     return res.status(500).json({
