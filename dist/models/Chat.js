@@ -11,6 +11,9 @@ const ChatSchema = new Schema({
     groupIcon: {
         type: String,
     },
+    groupDescription: {
+        type: String,
+    },
     admins: [
         {
             type: Types.ObjectId,

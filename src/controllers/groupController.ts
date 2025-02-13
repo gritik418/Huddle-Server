@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import groupSchema, { GroupData } from "../validators/groupSchema";
-import Chat from "../models/Chat";
+import groupSchema, { GroupData } from "../validators/groupSchema.js";
+import Chat from "../models/Chat.js";
 import { Socket } from "socket.io";
-import { ConnectedUsers } from "../socket/socketServer";
-import { ADDED_TO_GROUP } from "../constants/events";
-import User from "../models/User";
+import { ConnectedUsers } from "../socket/socketServer.js";
+import { ADDED_TO_GROUP } from "../constants/events.js";
+import User from "../models/User.js";
 
 export const getGroupById = async (
   req: Request,
