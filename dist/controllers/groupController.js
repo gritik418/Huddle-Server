@@ -10,11 +10,18 @@ export const getGroupById = async (req, res) => {
         const group = await Chat.findById(groupId)
             .populate("members", "_id firstName lastName username profilePicture")
             .populate("admins", "_id firstName lastName username profilePicture");
-        if (!group || group.deletedFor.includes(userId))
+        if (!group)
             return res.status(400).json({
                 success: false,
                 message: "Group doesn't exists.",
             });
+        const hasUserDeleted = group.deletedFor.some((id) => id.toString() === userId);
+        if (hasUserDeleted) {
+            return res.status(400).json({
+                success: false,
+                message: "You have already deleted or left the group.",
+            });
+        }
         return res.status(200).json({
             success: true,
             group,
@@ -114,6 +121,77 @@ export const deleteGroup = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Group deleted successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const leaveGroup = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const groupId = req.params.groupId;
+        const group = await Chat.findById(groupId);
+        if (!group)
+            return res.status(400).json({
+                success: false,
+                message: "Group doesn't exists.",
+            });
+        const isMember = group.members.some((member) => member.toString() === userId);
+        if (!isMember) {
+            return res.status(400).json({
+                success: false,
+                message: "User is not a member of the group.",
+            });
+        }
+        const isAdmin = group.admins?.some((admin) => admin.toString() === userId);
+        const isLastAdmin = group.admins?.length === 1 && isAdmin;
+        if (isLastAdmin) {
+            const remainingMembers = group.members.filter((member) => member.toString() !== userId);
+            if (remainingMembers.length > 0) {
+                const newAdmin = remainingMembers[0];
+                await Chat.findByIdAndUpdate(groupId, {
+                    $set: { admins: [newAdmin] },
+                    $pull: { members: userId, admins: userId },
+                    $push: { deletedFor: userId },
+                });
+                return res.status(200).json({
+                    success: true,
+                    message: "You have successfully left the group.",
+                });
+            }
+            else {
+                await Chat.findByIdAndDelete(groupId);
+                return res.status(200).json({
+                    success: true,
+                    message: "You have successfully left the group.",
+                });
+            }
+        }
+        if (isAdmin) {
+            await Chat.findByIdAndUpdate(groupId, {
+                $pull: { members: userId, admins: userId },
+            });
+        }
+        else {
+            await Chat.findByIdAndUpdate(groupId, {
+                $pull: { members: userId },
+            });
+        }
+        if (group.members.length === 1) {
+            await Chat.findByIdAndDelete(groupId);
+        }
+        else {
+            await Chat.findByIdAndUpdate(groupId, {
+                $push: { deletedFor: userId },
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "You have successfully left the group.",
         });
     }
     catch (error) {
