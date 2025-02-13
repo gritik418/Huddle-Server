@@ -13,6 +13,9 @@ const ChatSchema = new Schema<Chat>(
     groupIcon: {
       type: String,
     },
+    groupDescription: {
+      type: String,
+    },
     admins: [
       {
         type: Types.ObjectId,

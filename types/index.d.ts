@@ -25,6 +25,7 @@ interface Chat {
   _id: string;
   isGroupChat: boolean;
   groupName?: string;
+  groupDescription?: string;
   groupIcon?: string;
   members: Types.ObjectId[];
   admins?: Types.ObjectId[];
