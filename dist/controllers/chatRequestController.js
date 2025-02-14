@@ -1,4 +1,4 @@
-import { NEW_CHAT_REQUEST } from "../constants/events.js";
+import { NEW_CHAT, NEW_CHAT_REQUEST } from "../constants/events.js";
 import Chat from "../models/Chat.js";
 import ChatRequest from "../models/ChatRequest.js";
 import User from "../models/User.js";
@@ -215,7 +215,15 @@ export const acceptChatRequest = async (req, res) => {
             isGroupChat: false,
             members: [userId, chatRequest.sender],
         });
-        await chat.save();
+        const savedChat = await (await chat.save()).populate("members", "_id firstName lastName username profilePicture");
+        savedChat.members.forEach((member) => {
+            const receiverSocket = ConnectedUsers.get(member.toString());
+            if (receiverSocket && receiverSocket?.id) {
+                receiverSocket.emit(NEW_CHAT, {
+                    chat: savedChat,
+                });
+            }
+        });
         return res.status(200).json({
             success: true,
             message: "Chat request accepted.",
