@@ -54,6 +54,13 @@ interface ChatRequest {
   status: "pending" | "accepted" | "rejected";
 }
 
+interface FollowRequest {
+  _id: string;
+  sender: Types.ObjectId;
+  receiver: Types.ObjectId;
+  status: "pending" | "accepted" | "rejected";
+}
+
 interface Attachment {
   filename: string;
   fileType?: string;

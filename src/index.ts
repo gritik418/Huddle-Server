@@ -13,6 +13,7 @@ import chatRoutes from "./routes/chat.routes.js";
 import groupRoutes from "./routes/group.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import chatRequestRoutes from "./routes/chat-request.routes.js";
+import followRequestRoutes from "./routes/follow-request.routes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -35,6 +36,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/group", groupRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/chat-requests", chatRequestRoutes);
+app.use("/api/follow-requests", followRequestRoutes);
 
 server.listen(PORT, () => {
   console.log(`App served at: http://localhost:${PORT}`);
