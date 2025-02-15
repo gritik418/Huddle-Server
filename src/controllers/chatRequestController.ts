@@ -267,9 +267,9 @@ export const acceptChatRequest = async (
       await chat.save()
     ).populate("members", "_id firstName lastName username profilePicture");
 
-    savedChat.members.forEach((member: string) => {
+    savedChat.members.forEach((member: { _id: string }) => {
       const receiverSocket: Socket | undefined = ConnectedUsers.get(
-        member.toString()
+        member._id.toString()
       );
 
       if (receiverSocket && receiverSocket?.id) {
