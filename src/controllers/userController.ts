@@ -88,3 +88,42 @@ export const getFollowing = async (
     });
   }
 };
+
+export const getFollowers = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    if (!userId) {
+      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    const user: User | null = await User.findById(userId)
+      .select({
+        followers: 1,
+        _id: 1,
+      })
+      .populate("followers", "_id firstName lastName username profilePicture");
+
+    if (!user || !user._id) {
+      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      followers: user.followers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
