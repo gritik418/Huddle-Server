@@ -53,7 +53,10 @@ const socketServer = (httpServer) => {
     });
     io.on("connection", (socket) => {
         ConnectedUsers.set(socket.user.id, socket);
-        socket.on(USER_ONLINE, () => {
+        socket.on(USER_ONLINE, async () => {
+            await User.findByIdAndUpdate(socket.user.id, {
+                $set: { isActive: true },
+            });
             socket.user.chatMembers?.forEach((member) => {
                 const receiver = ConnectedUsers.get(member.toString());
                 if (receiver) {
@@ -70,8 +73,11 @@ const socketServer = (httpServer) => {
         socket.on(SEND_MESSAGE, async ({ message, chat }) => {
             await sendMessageHandler(io, socket, message, chat);
         });
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             ConnectedUsers.delete(socket.user.id);
+            await User.findByIdAndUpdate(socket.user.id, {
+                $set: { isActive: false },
+            });
             socket.user.chatMembers?.forEach((member) => {
                 const receiver = ConnectedUsers.get(member.toString());
                 if (receiver) {

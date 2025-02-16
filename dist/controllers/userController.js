@@ -57,15 +57,9 @@ export const getFollowing = async (req, res) => {
             _id: 1,
         })
             .populate("following", "_id firstName lastName username profilePicture");
-        if (!user || !user._id) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
-                success: false,
-                message: "Please Login.",
-            });
-        }
         return res.status(200).json({
             success: true,
-            following: user.following,
+            following: user?.following || [],
         });
     }
     catch (error) {
@@ -90,15 +84,44 @@ export const getFollowers = async (req, res) => {
             _id: 1,
         })
             .populate("followers", "_id firstName lastName username profilePicture");
-        if (!user || !user._id) {
+        return res.status(200).json({
+            success: true,
+            followers: user?.followers || [],
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const getActiveMembers = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
             return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
                 success: false,
                 message: "Please Login.",
             });
         }
+        const user = await User.findById(userId)
+            .select({
+            chatMembers: 1,
+            _id: 0,
+        })
+            .populate("chatMembers", "_id isActive");
+        const activeMembers = [];
+        user?.chatMembers?.forEach((member) => {
+            if (member.isActive) {
+                if (!activeMembers.includes(member._id.toString())) {
+                    activeMembers.push(member._id.toString());
+                }
+            }
+        });
         return res.status(200).json({
             success: true,
-            followers: user.followers,
+            activeMembers: activeMembers,
         });
     }
     catch (error) {

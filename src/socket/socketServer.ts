@@ -76,7 +76,11 @@ const socketServer = (
   io.on("connection", (socket: Socket) => {
     ConnectedUsers.set(socket.user.id, socket);
 
-    socket.on(USER_ONLINE, () => {
+    socket.on(USER_ONLINE, async () => {
+      await User.findByIdAndUpdate(socket.user.id, {
+        $set: { isActive: true },
+      });
+
       socket.user.chatMembers?.forEach((member: string) => {
         const receiver = ConnectedUsers.get(member.toString());
         if (receiver) {
@@ -99,8 +103,11 @@ const socketServer = (
       }
     );
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       ConnectedUsers.delete(socket.user.id);
+      await User.findByIdAndUpdate(socket.user.id, {
+        $set: { isActive: false },
+      });
 
       socket.user.chatMembers?.forEach((member: string) => {
         const receiver = ConnectedUsers.get(member.toString());
