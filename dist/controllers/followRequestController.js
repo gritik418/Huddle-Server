@@ -1,4 +1,4 @@
-import FollowRequest from "../models/FollowRequest";
+import FollowRequest from "../models/FollowRequest.js";
 export const getFollowRequests = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -21,10 +21,6 @@ export const getFollowRequests = async (req, res) => {
             success: true,
             requests,
         });
-        return res.status(200).json({
-            success: true,
-            message: "Follow request sent.",
-        });
     }
     catch (error) {
         return res.status(500).json({
@@ -33,6 +29,7 @@ export const getFollowRequests = async (req, res) => {
         });
     }
 };
+// Pending
 export const sendFollowRequest = async (req, res) => {
     try {
         return res.status(200).json({

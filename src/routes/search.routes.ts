@@ -1,9 +1,9 @@
 import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
-import { getFollowRequests } from "../controllers/followRequestController.js";
+import { search } from "../controllers/searchController.js";
 
 const router = Router();
 
-router.get("/", authenticate, getFollowRequests);
+router.get("/", authenticate, search);
 
 export default router;

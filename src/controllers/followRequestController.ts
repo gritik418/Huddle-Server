@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import FollowRequest from "../models/FollowRequest";
+import FollowRequest from "../models/FollowRequest.js";
 
 export const getFollowRequests = async (
   req: Request,
@@ -29,11 +29,6 @@ export const getFollowRequests = async (
       success: true,
       requests,
     });
-
-    return res.status(200).json({
-      success: true,
-      message: "Follow request sent.",
-    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -42,6 +37,7 @@ export const getFollowRequests = async (
   }
 };
 
+// Pending
 export const sendFollowRequest = async (
   req: Request,
   res: Response
