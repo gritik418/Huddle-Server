@@ -6,6 +6,7 @@ export const search = async (
   res: Response
 ): Promise<Response> => {
   try {
+    const userId: string = req.params.userId;
     const searchQuery: string = req.query["q"]?.toString() || "";
     const type: string = req.query["type"]?.toString() || "accounts";
 
@@ -23,6 +24,7 @@ export const search = async (
               username: { $regex: searchQuery, $options: "i" },
             },
           ],
+          _id: { $ne: userId },
           isVerified: true,
         }).select("_id firstName lastName username profilePicture");
 
@@ -45,6 +47,7 @@ export const search = async (
       message: "Please choose a valid type.",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Unexpected server error. Please try again later.",

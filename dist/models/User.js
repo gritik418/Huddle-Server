@@ -71,6 +71,12 @@ const UserSchema = new Schema({
             ref: "User",
         },
     ],
+    chatMembers: [
+        {
+            type: Types.ObjectId,
+            ref: "User",
+        },
+    ],
     verificationCode: {
         type: String,
     },

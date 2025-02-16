@@ -208,14 +208,18 @@ export const acceptChatRequest = async (req, res) => {
                 message: "Chat already exists between you and this user.",
             });
         }
-        await ChatRequest.findByIdAndUpdate(requestId, {
-            $set: { status: "accepted" },
-        });
+        await ChatRequest.findByIdAndDelete(requestId);
         const chat = new Chat({
             isGroupChat: false,
             members: [userId, chatRequest.sender],
         });
         const savedChat = await (await chat.save()).populate("members", "_id firstName lastName username profilePicture");
+        await User.findByIdAndUpdate(userId, {
+            $push: { chatMembers: [chatRequest.sender] },
+        });
+        await User.findByIdAndUpdate(chatRequest.sender, {
+            $push: { chatMembers: [userId] },
+        });
         savedChat.members.forEach((member) => {
             const receiverSocket = ConnectedUsers.get(member._id.toString());
             if (receiverSocket && receiverSocket?.id) {
@@ -273,9 +277,7 @@ export const declineChatRequest = async (req, res) => {
                 message: "Chat already exists between you and this user.",
             });
         }
-        await ChatRequest.findByIdAndUpdate(requestId, {
-            $set: { status: "rejected" },
-        });
+        await ChatRequest.findByIdAndDelete(requestId);
         return res.status(200).json({
             success: true,
             message: "Chat request rejected.",

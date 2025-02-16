@@ -10,6 +10,7 @@ interface User {
   isVerified: boolean;
   isActive: boolean;
   provider: "credentials" | "google";
+  chatMembers?: Types.ObjectId[];
   followers: Types.ObjectId[];
   following: Types.ObjectId[];
   followRequests: Types.ObjectId[];

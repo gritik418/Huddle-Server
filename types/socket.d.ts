@@ -8,6 +8,7 @@ declare module "socket.io" {
       lastName?: string;
       username: string;
       profilePicture?: string;
+      chatMembers?: string[];
     };
   }
 }

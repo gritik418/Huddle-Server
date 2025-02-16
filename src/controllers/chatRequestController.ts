@@ -229,6 +229,7 @@ export const acceptChatRequest = async (
     const chatRequest: ChatRequest | null = await ChatRequest.findById(
       requestId
     );
+
     if (!chatRequest)
       return res.status(400).json({
         success: false,
@@ -254,9 +255,7 @@ export const acceptChatRequest = async (
       });
     }
 
-    await ChatRequest.findByIdAndUpdate(requestId, {
-      $set: { status: "accepted" },
-    });
+    await ChatRequest.findByIdAndDelete(requestId);
 
     const chat = new Chat({
       isGroupChat: false,
@@ -266,6 +265,14 @@ export const acceptChatRequest = async (
     const savedChat = await (
       await chat.save()
     ).populate("members", "_id firstName lastName username profilePicture");
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { chatMembers: [chatRequest.sender] },
+    });
+
+    await User.findByIdAndUpdate(chatRequest.sender, {
+      $push: { chatMembers: [userId] },
+    });
 
     savedChat.members.forEach((member: { _id: string }) => {
       const receiverSocket: Socket | undefined = ConnectedUsers.get(
@@ -339,9 +346,7 @@ export const declineChatRequest = async (
       });
     }
 
-    await ChatRequest.findByIdAndUpdate(requestId, {
-      $set: { status: "rejected" },
-    });
+    await ChatRequest.findByIdAndDelete(requestId);
 
     return res.status(200).json({
       success: true,

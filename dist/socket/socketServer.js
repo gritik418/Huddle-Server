@@ -4,7 +4,7 @@ import { corsOptions } from "../constants/options.js";
 import { HUDDLE_TOKEN } from "../constants/variables.js";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
-import { SEND_MESSAGE } from "../constants/events.js";
+import { SEND_MESSAGE, STATUS_UPDATE, USER_ONLINE, } from "../constants/events.js";
 import { sendMessageHandler } from "./handlers/messageHandler.js";
 import User from "../models/User.js";
 export const SocketEventEmitter = new EventEmitter();
@@ -38,6 +38,7 @@ const socketServer = (httpServer) => {
                 lastName: 1,
                 username: 1,
                 profilePicture: 1,
+                chatMembers: 1,
             });
             socket.user = {
                 id: user._id.toString(),
@@ -45,12 +46,24 @@ const socketServer = (httpServer) => {
                 lastName: user.lastName || "",
                 username: user.username,
                 profilePicture: user.profilePicture || "",
+                chatMembers: user.chatMembers || [],
             };
             next();
         });
     });
     io.on("connection", (socket) => {
         ConnectedUsers.set(socket.user.id, socket);
+        socket.on(USER_ONLINE, () => {
+            socket.user.chatMembers?.forEach((member) => {
+                const receiver = ConnectedUsers.get(member.toString());
+                if (receiver) {
+                    io.to(receiver.id).emit(STATUS_UPDATE, {
+                        userId: socket.user.id,
+                        status: "ONLINE",
+                    });
+                }
+            });
+        });
         socket.on("reconnect", () => {
             ConnectedUsers.set(socket.user.id, socket);
         });
@@ -59,6 +72,15 @@ const socketServer = (httpServer) => {
         });
         socket.on("disconnect", () => {
             ConnectedUsers.delete(socket.user.id);
+            socket.user.chatMembers?.forEach((member) => {
+                const receiver = ConnectedUsers.get(member.toString());
+                if (receiver) {
+                    io.to(receiver.id).emit(STATUS_UPDATE, {
+                        userId: socket.user.id,
+                        status: "OFFLINE",
+                    });
+                }
+            });
         });
     });
 };
