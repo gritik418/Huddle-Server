@@ -50,6 +50,48 @@ export const getUser = async (
   }
 };
 
+export const getUserByUsername = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const username: string = req.params.username;
+
+    const user: User | null = await User.findOne({
+      username,
+      isVerified: true,
+    }).select({
+      followers: 1,
+      following: 1,
+      _id: 1,
+      bio: 1,
+      firstName: 1,
+      lastName: 1,
+      username: 1,
+      email: 1,
+      posts: 1,
+      profilePicture: 1,
+    });
+
+    if (!user || !user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
 export const getFollowing = async (
   req: Request,
   res: Response
