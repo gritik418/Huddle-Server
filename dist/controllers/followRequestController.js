@@ -1,7 +1,7 @@
 import FollowRequest from "../models/FollowRequest.js";
 import User from "../models/User.js";
 import { ConnectedUsers } from "../socket/socketServer.js";
-import { NEW_FOLLOW_REQUEST } from "../constants/events.js";
+import { ACCEPTED_FOLLOW_REQUEST, NEW_FOLLOW_REQUEST, } from "../constants/events.js";
 export const getFollowRequests = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -90,6 +90,65 @@ export const sendFollowRequest = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Follow request sent.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const acceptFollowRequest = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const requestId = req.params.requestId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        if (!requestId)
+            return res.status(400).json({
+                success: false,
+                message: "Request Id is required.",
+            });
+        const request = await FollowRequest.findById(requestId);
+        if (!request)
+            return res.status(400).json({
+                success: false,
+                message: "Follow request not found.",
+            });
+        if (request.receiver.toString() !== userId) {
+            return res.status(400).json({
+                success: false,
+                message: "You are not the intended recipient of this request.",
+            });
+        }
+        await User.findByIdAndUpdate(userId, {
+            $push: { followers: request.sender },
+        });
+        await User.findByIdAndUpdate(request.sender, {
+            $push: { following: userId },
+        });
+        await FollowRequest.findByIdAndDelete(requestId);
+        const receiverSocket = ConnectedUsers.get(request.sender.toString());
+        if (receiverSocket && receiverSocket.id) {
+            const user = await User.findById(userId);
+            receiverSocket.emit(ACCEPTED_FOLLOW_REQUEST, {
+                status: "Accepted",
+                receiver: {
+                    _id: user?._id,
+                    firstName: user?.firstName,
+                    lastName: user?.lastName,
+                    username: user?.username,
+                    profilePicture: user?.profilePicture,
+                },
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Follow request accepted.",
         });
     }
     catch (error) {

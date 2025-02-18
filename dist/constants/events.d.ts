@@ -7,3 +7,4 @@ export declare const NEW_CHAT = "new_chat";
 export declare const USER_ONLINE = "user_online";
 export declare const STATUS_UPDATE = "status_update";
 export declare const NEW_FOLLOW_REQUEST = "new_follow_request";
+export declare const ACCEPTED_FOLLOW_REQUEST = "accepted_follow_request";
