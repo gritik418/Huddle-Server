@@ -202,3 +202,52 @@ export const acceptFollowRequest = async (
     });
   }
 };
+
+export const declineFollowRequest = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const requestId: string = req.params.requestId;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!requestId)
+      return res.status(400).json({
+        success: false,
+        message: "Request Id is required.",
+      });
+
+    const request: FollowRequest | null = await FollowRequest.findById(
+      requestId
+    );
+    if (!request)
+      return res.status(400).json({
+        success: false,
+        message: "Follow request not found.",
+      });
+
+    if (request.receiver.toString() !== userId) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not the intended recipient of this request.",
+      });
+    }
+    await FollowRequest.findByIdAndDelete(requestId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Follow request rejected.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
