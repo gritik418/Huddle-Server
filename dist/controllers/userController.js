@@ -1,11 +1,9 @@
 import User from "../models/User.js";
-import { HUDDLE_TOKEN } from "../constants/variables.js";
-import { cookieOptions } from "../constants/options.js";
 export const getUser = async (req, res) => {
     try {
         const userId = req.params.userId;
         if (!userId) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+            return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
@@ -25,7 +23,7 @@ export const getUser = async (req, res) => {
             blockedUsers: 1,
         });
         if (!user || !user._id) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+            return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
@@ -82,7 +80,7 @@ export const getFollowing = async (req, res) => {
     try {
         const userId = req.params.userId;
         if (!userId) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+            return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
@@ -109,11 +107,12 @@ export const getFollowers = async (req, res) => {
     try {
         const userId = req.params.userId;
         if (!userId) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+            return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
         }
+        console.log(userId);
         const user = await User.findById(userId)
             .select({
             followers: 1,
@@ -136,7 +135,7 @@ export const getActiveMembers = async (req, res) => {
     try {
         const userId = req.params.userId;
         if (!userId) {
-            return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+            return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });

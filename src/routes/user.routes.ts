@@ -12,14 +12,12 @@ const router = Router();
 
 router.get("/", authenticate, getUser);
 
-router.get("/:username", authenticate, getUserByUsername);
-
 router.get("/following", authenticate, getFollowing);
 
 router.get("/followers", authenticate, getFollowers);
 
 router.get("/active", authenticate, getActiveMembers);
 
-router.get("/active", authenticate, getActiveMembers);
+router.get("/:username", authenticate, getUserByUsername);
 
 export default router;

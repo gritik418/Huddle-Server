@@ -230,3 +230,20 @@ export const verifyEmail = async (
     });
   }
 };
+
+export const userLogout = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    return res.status(200).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      success: true,
+      message: "Logged out successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};

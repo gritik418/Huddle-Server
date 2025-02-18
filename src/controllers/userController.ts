@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
-import { HUDDLE_TOKEN } from "../constants/variables.js";
-import { cookieOptions } from "../constants/options.js";
 
 export const getUser = async (
   req: Request,
@@ -10,7 +8,7 @@ export const getUser = async (
   try {
     const userId: string = req.params.userId;
     if (!userId) {
-      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      return res.status(401).json({
         success: false,
         message: "Please Login.",
       });
@@ -32,7 +30,7 @@ export const getUser = async (
     });
 
     if (!user || !user._id) {
-      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      return res.status(401).json({
         success: false,
         message: "Please Login.",
       });
@@ -99,7 +97,7 @@ export const getFollowing = async (
   try {
     const userId: string = req.params.userId;
     if (!userId) {
-      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      return res.status(401).json({
         success: false,
         message: "Please Login.",
       });
@@ -131,11 +129,12 @@ export const getFollowers = async (
   try {
     const userId: string = req.params.userId;
     if (!userId) {
-      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      return res.status(401).json({
         success: false,
         message: "Please Login.",
       });
     }
+    console.log(userId);
 
     const user: User | null = await User.findById(userId)
       .select({
@@ -163,7 +162,7 @@ export const getActiveMembers = async (
   try {
     const userId: string = req.params.userId;
     if (!userId) {
-      return res.status(401).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
+      return res.status(401).json({
         success: false,
         message: "Please Login.",
       });
