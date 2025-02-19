@@ -32,6 +32,9 @@ const UserSchema = new Schema({
     bio: {
         type: String,
     },
+    coverImage: {
+        type: String,
+    },
     isActive: {
         type: Boolean,
         default: false,
