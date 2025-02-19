@@ -15,6 +15,6 @@ router.post("/login", userLogin);
 
 router.post("/verify-email", verifyEmail);
 
-router.get("/logout", authenticate, userLogout);
+router.post("/logout", authenticate, userLogout);
 
 export default router;

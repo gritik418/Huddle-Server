@@ -36,6 +36,10 @@ const UserSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    isPrivate: {
+        type: Boolean,
+        default: false,
+    },
     provider: {
         type: String,
         enum: ["credentials", "google"],

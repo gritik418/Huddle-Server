@@ -9,6 +9,7 @@ interface User {
   bio?: string;
   isVerified: boolean;
   isActive: boolean;
+  isPrivate: boolean;
   provider: "credentials" | "google";
   chatMembers?: Types.ObjectId[];
   followers: Types.ObjectId[];
@@ -20,6 +21,37 @@ interface User {
   verificationCodeExpiry?: Date;
   passwordResetToken?: string;
   passwordResetTokenExpiry?: Date;
+}
+
+interface Post {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  content: string;
+  mediaUrls?: string[];
+  likes: Types.ObjectId[];
+  comments: Types.ObjectId[];
+  location?: string;
+  mentions?: Types.ObjectId[];
+  hashtags?: string[];
+}
+
+interface Comment {
+  _id: Types.ObjectId;
+  postId: Types.ObjectId;
+  userId: Types.ObjectId;
+  content: string;
+  likes: Types.ObjectId[];
+  replies: Types.ObjectId[];
+  mentions?: Types.ObjectId[];
+}
+
+interface CommentReply {
+  _id: Types.ObjectId;
+  commentId: Types.ObjectId;
+  userId: Types.ObjectId;
+  content: string;
+  likes: Types.ObjectId[];
+  mentions?: Types.ObjectId[];
 }
 
 interface Chat {
