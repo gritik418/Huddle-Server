@@ -22,6 +22,8 @@ export const getUser = async (req, res) => {
             friendRequests: 1,
             friends: 1,
             blockedUsers: 1,
+            profilePicture: 1,
+            coverImage: 1,
         });
         if (!user || !user._id) {
             return res.status(401).json({
@@ -113,7 +115,6 @@ export const getFollowers = async (req, res) => {
                 message: "Please Login.",
             });
         }
-        console.log(userId);
         const user = await User.findById(userId)
             .select({
             followers: 1,
@@ -213,9 +214,9 @@ export const updateUser = async (req, res) => {
         if (req.files &&
             !Array.isArray(req.files) &&
             typeof req.files === "object") {
-            if (req.files["avatar"]) {
-                const avatarPath = `${process.env.BASE_URL}/uploads/${userId}/avatar/${req.files["avatar"][0].originalname}`;
-                updateData.profilePicture = avatarPath;
+            if (req.files["profilePicture"]) {
+                const profilePicturePath = `${process.env.BASE_URL}/uploads/${userId}/profilePicture/${req.files["profilePicture"][0].originalname}`;
+                updateData.profilePicture = profilePicturePath;
             }
             if (req.files["coverImage"]) {
                 const coverImagePath = `${process.env.BASE_URL}/uploads/${userId}/coverImage/${req.files["coverImage"][0].originalname}`;

@@ -31,10 +31,10 @@ router.put("/", authenticate, function (req, res) {
                     });
             }
         }
-        else if (err) {
-            return res.status(500).json({
+        else if (err instanceof Error) {
+            return res.status(400).json({
                 success: false,
-                message: "Unexpected server error. Please try again later.",
+                message: err.message,
             });
         }
         updateUser(req, res);

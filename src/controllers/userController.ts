@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
-import usernameSchema, {
+import updateUserSchema, {
   UpdateUserData,
 } from "../validators/updateUserSchema.js";
-import updateUserSchema from "../validators/updateUserSchema.js";
 
 export const getUser = async (
   req: Request,
@@ -31,6 +30,8 @@ export const getUser = async (
       friendRequests: 1,
       friends: 1,
       blockedUsers: 1,
+      profilePicture: 1,
+      coverImage: 1,
     });
 
     if (!user || !user._id) {
@@ -138,7 +139,6 @@ export const getFollowers = async (
         message: "Please Login.",
       });
     }
-    console.log(userId);
 
     const user: User | null = await User.findById(userId)
       .select({
@@ -208,6 +208,7 @@ export const updateUser = async (
   try {
     const userId: string = req.params.userId;
     const data: UpdateUserData = req.body;
+
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -264,9 +265,9 @@ export const updateUser = async (
       !Array.isArray(req.files) &&
       typeof req.files === "object"
     ) {
-      if (req.files["avatar"]) {
-        const avatarPath = `${process.env.BASE_URL}/uploads/${userId}/avatar/${req.files["avatar"][0].originalname}`;
-        updateData.profilePicture = avatarPath;
+      if (req.files["profilePicture"]) {
+        const profilePicturePath = `${process.env.BASE_URL}/uploads/${userId}/profilePicture/${req.files["profilePicture"][0].originalname}`;
+        updateData.profilePicture = profilePicturePath;
       }
       if (req.files["coverImage"]) {
         const coverImagePath = `${process.env.BASE_URL}/uploads/${userId}/coverImage/${req.files["coverImage"][0].originalname}`;

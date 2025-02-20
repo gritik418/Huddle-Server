@@ -40,10 +40,10 @@ router.put("/", authenticate, function (req: Request, res: Response) {
             message: "An error occurred during the file upload.",
           });
       }
-    } else if (err) {
-      return res.status(500).json({
+    } else if (err instanceof Error) {
+      return res.status(400).json({
         success: false,
-        message: "Unexpected server error. Please try again later.",
+        message: err.message,
       });
     }
     updateUser(req, res);

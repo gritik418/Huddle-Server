@@ -1,6 +1,6 @@
 import fs from "fs";
 import multer from "multer";
-import path, { dirname } from "path";
+import path, { dirname, extname } from "path";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,12 +11,12 @@ const userStorage = multer.diskStorage({
     const userId = req.params.userId;
     let destinationPath;
 
-    if (file.fieldname === "avatar") {
+    if (file.fieldname === "profilePicture") {
       destinationPath = path.join(
         __dirname,
         "../../public/uploads/",
         userId,
-        "/avatar"
+        "/profilePicture"
       );
     } else {
       destinationPath = path.join(
@@ -42,9 +42,55 @@ const userStorage = multer.diskStorage({
   },
 });
 
+const postMediaStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const userId = req.params.userId;
+
+    const destinationPath = path.join(
+      __dirname,
+      "../../public/uploads/",
+      userId,
+      "/posts"
+    );
+
+    fs.mkdirSync(destinationPath, { recursive: true });
+
+    cb(null, destinationPath);
+  },
+  filename: function (req, file, cb) {
+    const extName = extname(file.originalname);
+    const filename = `${Date.now()}-${file.fieldname}${extName}`;
+
+    cb(null, filename);
+  },
+});
+
+const imageFileFilter = (
+  req: any,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "image/webp",
+  ];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type.") as any, false);
+  }
+};
+
+export const uploadPostMedia = multer({
+  storage: postMediaStorage,
+}).array("media");
+
 export const uploadUserAvatarOrCoverImage = multer({
   storage: userStorage,
+  fileFilter: imageFileFilter,
 }).fields([
-  { name: "avatar", maxCount: 1 },
+  { name: "profilePicture", maxCount: 1 },
   { name: "coverImage", maxCount: 1 },
 ]);
