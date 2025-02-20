@@ -97,13 +97,52 @@ export const getPosts = async (req: Request, res: Response) => {
     if (!posts.length) {
       return res.status(200).json({
         success: true,
-        message: "Oops! Looks like you haven't posted anything yet. 🌱",
+        message: "Oops! Looks like you haven't posted anything yet.",
       });
     }
 
     return res.status(200).json({
       success: true,
       posts,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const getPostById = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    const postId: string = req.params.postId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!postId) {
+      return res.status(400).json({
+        success: false,
+        message: "Post Id is required.",
+      });
+    }
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(400).json({
+        success: false,
+        message: "Oops! Looks like this post doesn't exist.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      post,
     });
   } catch (error) {
     return res.status(500).json({

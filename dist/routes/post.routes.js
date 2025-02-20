@@ -1,8 +1,8 @@
 import { Router } from "express";
-import authenticate from "../middlewares/authenticate.js";
-import { uploadPostMedia } from "../config/multerConfig.js";
 import multer from "multer";
-import { addPost, getPosts } from "../controllers/postController.js";
+import { uploadPostMedia } from "../config/multerConfig.js";
+import { addPost, getPostById, getPosts, } from "../controllers/postController.js";
+import authenticate from "../middlewares/authenticate.js";
 const router = Router();
 router.post("/", authenticate, function (req, res) {
     uploadPostMedia(req, res, function (err) {
@@ -39,5 +39,6 @@ router.post("/", authenticate, function (req, res) {
         addPost(req, res);
     });
 });
+router.get("/:postId", authenticate, getPostById);
 router.get("/", authenticate, getPosts);
 export default router;

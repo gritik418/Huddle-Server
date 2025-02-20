@@ -2,7 +2,7 @@ import fs from "fs";
 import multer from "multer";
 import path, { dirname, extname } from "path";
 import { fileURLToPath } from "url";
-import { imageFileFilter, postMediaFileFilter } from "../helpers/fileFilters";
+import { imageFileFilter, postMediaFileFilter, } from "../helpers/fileFilters.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const userStorage = multer.diskStorage({
