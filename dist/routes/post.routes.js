@@ -2,7 +2,7 @@ import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import { uploadPostMedia } from "../config/multerConfig.js";
 import multer from "multer";
-import { addPost } from "../controllers/postController.js";
+import { addPost, getPosts } from "../controllers/postController.js";
 const router = Router();
 router.post("/", authenticate, function (req, res) {
     uploadPostMedia(req, res, function (err) {
@@ -39,4 +39,5 @@ router.post("/", authenticate, function (req, res) {
         addPost(req, res);
     });
 });
+router.get("/", authenticate, getPosts);
 export default router;

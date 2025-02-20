@@ -2,6 +2,7 @@ import fs from "fs";
 import multer from "multer";
 import path, { dirname, extname } from "path";
 import { fileURLToPath } from "url";
+import { imageFileFilter, postMediaFileFilter } from "../helpers/fileFilters";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -65,30 +66,20 @@ const postMediaStorage = multer.diskStorage({
   },
 });
 
-const imageFileFilter = (
-  req: any,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback
-) => {
-  const allowedMimeTypes = [
-    "image/jpeg",
-    "image/png",
-    "image/jpg",
-    "image/webp",
-  ];
-  if (allowedMimeTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Invalid file type.") as any, false);
-  }
-};
-
 export const uploadPostMedia = multer({
   storage: postMediaStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 10,
+  },
+  fileFilter: postMediaFileFilter,
 }).array("media");
 
 export const uploadUserAvatarOrCoverImage = multer({
   storage: userStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
   fileFilter: imageFileFilter,
 }).fields([
   { name: "profilePicture", maxCount: 1 },

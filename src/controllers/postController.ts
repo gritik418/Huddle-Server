@@ -87,3 +87,28 @@ export const addPost = async (
     });
   }
 };
+
+export const getPosts = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+
+    const posts = await Post.find({ userId });
+
+    if (!posts.length) {
+      return res.status(200).json({
+        success: true,
+        message: "Oops! Looks like you haven't posted anything yet. 🌱",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
