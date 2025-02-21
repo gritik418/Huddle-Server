@@ -6,13 +6,13 @@ declare const postSchema: z.ZodObject<{
     hashtags: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
 }, "strip", z.ZodTypeAny, {
     content: string;
-    mentions?: string[] | undefined;
     location?: string | undefined;
+    mentions?: string[] | undefined;
     hashtags?: string[] | undefined;
 }, {
     content: string;
-    mentions?: string[] | undefined;
     location?: string | undefined;
+    mentions?: string[] | undefined;
     hashtags?: string[] | undefined;
 }>;
 export type PostData = z.infer<typeof postSchema>;

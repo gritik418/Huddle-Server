@@ -5,6 +5,7 @@ import {
   addPost,
   getPostById,
   getPosts,
+  getPostsByFollowing,
 } from "../controllers/postController.js";
 import authenticate from "../middlewares/authenticate.js";
 
@@ -45,8 +46,10 @@ router.post("/", authenticate, function (req: Request, res: Response) {
   });
 });
 
-router.get("/:postId", authenticate, getPostById);
-
 router.get("/", authenticate, getPosts);
+
+router.get("/following", authenticate, getPostsByFollowing);
+
+router.get("/:postId", authenticate, getPostById);
 
 export default router;

@@ -1,6 +1,7 @@
 import multer from "multer";
 import Post from "../models/Post.js";
 import postSchema from "../validators/postSchema.js";
+import User from "../models/User.js";
 export const addPost = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -123,6 +124,43 @@ export const getPostById = async (req, res) => {
         return res.status(200).json({
             success: true,
             post,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const getPostsByFollowing = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        const user = await User.findById(userId).select({ following: 1 });
+        if (!user.following || user.following.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "You are not following anyone. No posts to show.",
+            });
+        }
+        const posts = await Post.find({
+            userId: { $in: user.following },
+        }).populate("userId", "_id firstName lastName username coverImage profilePicture");
+        if (!posts || posts.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: "No posts from users you are following.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            posts,
         });
     }
     catch (error) {
