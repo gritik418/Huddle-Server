@@ -74,6 +74,7 @@ export const getUserByUsername = async (
       email: 1,
       posts: 1,
       profilePicture: 1,
+      coverImage: 1,
     });
 
     if (!user || !user._id) {

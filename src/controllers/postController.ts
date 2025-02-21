@@ -197,3 +197,67 @@ export const getPostsByFollowing = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getFeed = async (req: Request, res: Response) => {
+  try {
+    const userId: string = req.params.userId;
+    const { page = 1, limit = 20 } = req.query;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    const publicUsers = await User.find({
+      isPrivate: false,
+      _id: { $ne: userId },
+    }).select({
+      _id: 1,
+    });
+
+    const publicUserIds: string[] = publicUsers.map((user) =>
+      user._id.toString()
+    );
+
+    const totalPosts = await Post.countDocuments({
+      userId: { $in: publicUserIds },
+    });
+
+    const totalPages = Math.ceil(totalPosts / +limit);
+
+    const posts = await Post.find({
+      userId: { $in: publicUserIds },
+    })
+      .skip((+page - 1) * +limit)
+      .limit(+limit)
+      .populate(
+        "userId",
+        "_id firstName lastName username coverImage profilePicture"
+      )
+      .sort({ createdAt: -1 });
+
+    if (!posts || posts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No posts found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts,
+      pagination: {
+        page: +page,
+        limit: +limit,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};

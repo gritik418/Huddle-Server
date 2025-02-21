@@ -60,6 +60,7 @@ export const getUserByUsername = async (req, res) => {
             email: 1,
             posts: 1,
             profilePicture: 1,
+            coverImage: 1,
         });
         if (!user || !user._id) {
             return res.status(401).json({
