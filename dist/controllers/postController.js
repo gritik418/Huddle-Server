@@ -2,9 +2,12 @@ import multer from "multer";
 import Post from "../models/Post.js";
 import postSchema from "../validators/postSchema.js";
 import User from "../models/User.js";
+import { ConnectedUsers } from "../socket/socketServer.js";
+import { NEW_MENTION } from "../constants/events.js";
 export const addPost = async (req, res) => {
     try {
         const userId = req.params.userId;
+        console.log(req.body);
         const data = req.body;
         const mediaUrls = [];
         if (!userId) {
@@ -39,7 +42,23 @@ export const addPost = async (req, res) => {
             location: result.data.location,
             content: result.data.content,
         });
-        await post.save();
+        const savedPost = await post.save();
+        const user = await User.findById(userId);
+        result.data.mentions?.forEach((mention) => {
+            const receiverSocket = ConnectedUsers.get(mention.toString());
+            if (receiverSocket && receiverSocket?.id) {
+                receiverSocket.emit(NEW_MENTION, {
+                    postId: savedPost._id,
+                    creator: {
+                        _id: user?._id,
+                        firstName: user?.firstName,
+                        lastName: user?.lastName,
+                        username: user?.username,
+                        profilePicture: user?.profilePicture,
+                    },
+                });
+            }
+        });
         return res.status(201).json({
             success: true,
             message: "Post added.",

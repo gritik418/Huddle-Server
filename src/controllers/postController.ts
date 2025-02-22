@@ -3,6 +3,9 @@ import multer from "multer";
 import Post from "../models/Post.js";
 import postSchema, { PostData } from "../validators/postSchema.js";
 import User from "../models/User.js";
+import { Socket } from "socket.io";
+import { ConnectedUsers } from "../socket/socketServer.js";
+import { NEW_MENTION } from "../constants/events.js";
 
 export const addPost = async (
   req: Request,
@@ -10,6 +13,7 @@ export const addPost = async (
 ): Promise<Response> => {
   try {
     const userId = req.params.userId;
+    console.log(req.body);
     const data: PostData = req.body;
     const mediaUrls: string[] = [];
 
@@ -51,7 +55,27 @@ export const addPost = async (
       content: result.data.content,
     });
 
-    await post.save();
+    const savedPost = await post.save();
+    const user = await User.findById(userId);
+
+    result.data.mentions?.forEach((mention: string) => {
+      const receiverSocket: Socket | undefined = ConnectedUsers.get(
+        mention.toString()
+      );
+
+      if (receiverSocket && receiverSocket?.id) {
+        receiverSocket.emit(NEW_MENTION, {
+          postId: savedPost._id,
+          creator: {
+            _id: user?._id,
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+            username: user?.username,
+            profilePicture: user?.profilePicture,
+          },
+        });
+      }
+    });
 
     return res.status(201).json({
       success: true,
