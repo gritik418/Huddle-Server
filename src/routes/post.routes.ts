@@ -3,6 +3,7 @@ import multer from "multer";
 import { uploadPostMedia } from "../config/multerConfig.js";
 import {
   addPost,
+  deletePost,
   getFeed,
   getPostById,
   getPosts,
@@ -54,5 +55,7 @@ router.get("/feed", authenticate, getFeed);
 router.get("/following", authenticate, getPostsByFollowing);
 
 router.get("/:postId", authenticate, getPostById);
+
+router.delete("/:postId", authenticate, deletePost);
 
 export default router;

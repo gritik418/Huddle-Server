@@ -240,3 +240,14 @@ export const getFeed = async (req, res) => {
         });
     }
 };
+// Todo
+export const deletePost = async (req, res) => {
+    try {
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};

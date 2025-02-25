@@ -45,6 +45,7 @@ export const sendMessageHandler = async (
       if (receiver) {
         io.to(receiver.id).emit(NEW_MESSAGE, {
           message: modifiedMessage,
+          chat: chat,
         });
       }
     });
