@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { uploadPostMedia } from "../config/multerConfig.js";
-import { addPost, getFeed, getPostById, getPosts, getPostsByFollowing, } from "../controllers/postController.js";
+import { addPost, deletePost, getFeed, getPostById, getPosts, getPostsByFollowing, likePost, unlikePost, } from "../controllers/postController.js";
 import authenticate from "../middlewares/authenticate.js";
 const router = Router();
 router.post("/", authenticate, function (req, res) {
@@ -43,4 +43,7 @@ router.get("/", authenticate, getPosts);
 router.get("/feed", authenticate, getFeed);
 router.get("/following", authenticate, getPostsByFollowing);
 router.get("/:postId", authenticate, getPostById);
+router.delete("/:postId", authenticate, deletePost);
+router.post("/:postId/like", authenticate, likePost);
+router.delete("/:postId/like", authenticate, unlikePost);
 export default router;

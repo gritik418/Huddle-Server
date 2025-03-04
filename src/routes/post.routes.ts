@@ -8,6 +8,8 @@ import {
   getPostById,
   getPosts,
   getPostsByFollowing,
+  likePost,
+  unlikePost,
 } from "../controllers/postController.js";
 import authenticate from "../middlewares/authenticate.js";
 
@@ -57,5 +59,9 @@ router.get("/following", authenticate, getPostsByFollowing);
 router.get("/:postId", authenticate, getPostById);
 
 router.delete("/:postId", authenticate, deletePost);
+
+router.post("/:postId/like", authenticate, likePost);
+
+router.delete("/:postId/like", authenticate, unlikePost);
 
 export default router;

@@ -13,7 +13,6 @@ export const addPost = async (
 ): Promise<Response> => {
   try {
     const userId = req.params.userId;
-    console.log(req.body);
     const data: PostData = req.body;
     const mediaUrls: string[] = [];
 
@@ -308,7 +307,7 @@ export const deletePost = async (req: Request, res: Response) => {
     if (post.userId.toString() !== userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized",
+        message: "You are not authorized to delete this post.",
       });
     }
 
@@ -316,7 +315,91 @@ export const deletePost = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Post deleted.",
+      message: "Post successfully deleted.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const likePost = async (req: Request, res: Response) => {
+  try {
+    const postId: string = req.params.postId;
+    const userId: string = req.params.userId;
+
+    if (!postId)
+      return res.status(400).json({
+        success: false,
+        message: "Post Id is required.",
+      });
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found.",
+      });
+    }
+
+    if (post.likes.includes(userId)) {
+      return res.status(200).json({
+        success: true,
+        message: "Post liked successfully.",
+      });
+    }
+
+    await Post.findByIdAndUpdate(postId, {
+      $push: { likes: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Post liked successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const unlikePost = async (req: Request, res: Response) => {
+  try {
+    const postId: string = req.params.postId;
+    const userId: string = req.params.userId;
+
+    if (!postId)
+      return res.status(400).json({
+        success: false,
+        message: "Post Id is required.",
+      });
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found.",
+      });
+    }
+
+    if (!post.likes.includes(userId)) {
+      return res.status(200).json({
+        success: true,
+        message: "Post unliked successfully.",
+      });
+    }
+
+    await Post.findByIdAndUpdate(postId, {
+      $pull: { likes: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Post unliked successfully.",
     });
   } catch (error) {
     return res.status(500).json({

@@ -7,7 +7,6 @@ import { NEW_MENTION } from "../constants/events.js";
 export const addPost = async (req, res) => {
     try {
         const userId = req.params.userId;
-        console.log(req.body);
         const data = req.body;
         const mediaUrls = [];
         if (!userId) {
@@ -240,9 +239,107 @@ export const getFeed = async (req, res) => {
         });
     }
 };
-// Todo
 export const deletePost = async (req, res) => {
     try {
+        const userId = req.params.userId;
+        const postId = req.params.postId;
+        if (!postId)
+            return res.status(400).json({
+                success: false,
+                message: "Post Id is required.",
+            });
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(400).json({
+                success: false,
+                message: "Oops! Looks like this post doesn't exist.",
+            });
+        }
+        if (post.userId.toString() !== userId) {
+            return res.status(401).json({
+                success: false,
+                message: "You are not authorized to delete this post.",
+            });
+        }
+        await Post.findByIdAndDelete(postId);
+        return res.status(200).json({
+            success: true,
+            message: "Post successfully deleted.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const likePost = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const userId = req.params.userId;
+        if (!postId)
+            return res.status(400).json({
+                success: false,
+                message: "Post Id is required.",
+            });
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found.",
+            });
+        }
+        if (post.likes.includes(userId)) {
+            return res.status(200).json({
+                success: true,
+                message: "Post liked successfully.",
+            });
+        }
+        await Post.findByIdAndUpdate(postId, {
+            $push: { likes: userId },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Post liked successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const unlikePost = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const userId = req.params.userId;
+        if (!postId)
+            return res.status(400).json({
+                success: false,
+                message: "Post Id is required.",
+            });
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({
+                success: false,
+                message: "Post not found.",
+            });
+        }
+        if (!post.likes.includes(userId)) {
+            return res.status(200).json({
+                success: true,
+                message: "Post unliked successfully.",
+            });
+        }
+        await Post.findByIdAndUpdate(postId, {
+            $pull: { likes: userId },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Post unliked successfully.",
+        });
     }
     catch (error) {
         return res.status(500).json({
