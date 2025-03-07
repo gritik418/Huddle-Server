@@ -54,12 +54,6 @@ const UserSchema = new Schema({
             ref: "Post",
         },
     ],
-    followRequests: [
-        {
-            type: Types.ObjectId,
-            ref: "User",
-        },
-    ],
     followers: [
         {
             type: Types.ObjectId,

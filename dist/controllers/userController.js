@@ -10,7 +10,6 @@ export const getUser = async (req, res) => {
             });
         }
         const user = await User.findById(userId).select({
-            followRequests: 1,
             followers: 1,
             following: 1,
             _id: 1,

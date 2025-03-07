@@ -15,7 +15,6 @@ interface User {
   chatMembers?: Types.ObjectId[];
   followers: Types.ObjectId[];
   following: Types.ObjectId[];
-  followRequests: Types.ObjectId[];
   blockedUsers: Types.ObjectId[];
   posts: Types.ObjectId[];
   verificationCode?: string;

@@ -18,7 +18,6 @@ export const getUser = async (
     }
 
     const user: User | null = await User.findById(userId).select({
-      followRequests: 1,
       followers: 1,
       following: 1,
       _id: 1,
