@@ -14,9 +14,10 @@ export const getGroupById = async (
     const userId: string = req.params.userId;
     const groupId: string = req.params.groupId;
 
-    const group: Chat | null = await Chat.findById(groupId)
-      .populate("members", "_id firstName lastName username profilePicture")
-      .populate("admins", "_id firstName lastName username profilePicture");
+    const group: Chat | null = await Chat.findById(groupId).populate(
+      "members",
+      "_id firstName lastName username profilePicture"
+    );
 
     if (!group)
       return res.status(400).json({
@@ -68,11 +69,17 @@ export const createGroup = async (
         errors,
       });
     }
-    const { groupName, groupDescription, admins, members } = result.data;
+    const { groupName, groupDescription, admins = [], members } = result.data;
+
+    let groupIcon: string | null = null;
+    if (req.file) {
+      groupIcon = `${process.env.BASE_URL}/uploads/${userId}/group/icons/${req.file.filename}`;
+    }
 
     const newGroup = new Chat({
       isGroupChat: true,
       groupName,
+      groupIcon,
       groupDescription,
       members: [...members, userId],
       admins: [...admins, userId],

@@ -46,6 +46,31 @@ const userStorage = multer.diskStorage({
   },
 });
 
+const groupIconStorage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    const userId = req.params.userId;
+    const destinationPath = path.join(
+      __dirname,
+      "../../public/uploads/",
+      userId,
+      "/group/icons"
+    );
+
+    try {
+      await fs.promises.rm(destinationPath, { recursive: true, force: true });
+      await fs.promises.mkdir(destinationPath, { recursive: true });
+
+      cb(null, destinationPath);
+    } catch (err) {
+      cb(new Error("Error while handling the file upload directory."), "");
+    }
+  },
+  filename: function (req, file, cb) {
+    const filename = `${Date.now()}-${file.originalname}`;
+    cb(null, filename);
+  },
+});
+
 const postMediaStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const userId = req.params.userId;
@@ -77,6 +102,15 @@ export const uploadPostMedia = multer({
   },
   fileFilter: postMediaFileFilter,
 }).array("media");
+
+export const uploadGroupIcon = multer({
+  storage: groupIconStorage,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: postMediaFileFilter,
+}).single("groupIcon");
 
 export const uploadUserAvatarOrCoverImage = multer({
   storage: userStorage,

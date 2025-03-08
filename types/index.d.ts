@@ -23,6 +23,31 @@ interface User {
   passwordResetTokenExpiry?: Date;
 }
 
+// Not Implemented
+interface UserSettings {
+  userId: string;
+
+  privacy: {
+    isPrivate: boolean;
+    showActiveStatus: boolean;
+    allowMentions: boolean;
+  };
+
+  notifications: {
+    chatNotifications: boolean;
+    followRequestNotifications: boolean;
+    chatRequestNotifications: boolean;
+  };
+
+  appearance: {
+    theme: "light" | "dark";
+  };
+
+  account: {
+    connectedAccounts: string[];
+  };
+}
+
 interface Post {
   _id: Types.ObjectId;
   userId: Types.ObjectId;

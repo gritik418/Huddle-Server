@@ -14,16 +14,18 @@ const groupSchema = z
     members: z
         .array(z.string().min(1, "Members are required."))
         .min(2, "There must be at least two members."),
-    admins: z.array(z.string()),
+    admins: z.array(z.string()).optional(),
 })
     .superRefine(({ members, admins }, ctx) => {
-    const nonMembers = admins.filter((admin) => !members.includes(admin));
-    if (nonMembers.length > 0) {
-        ctx.addIssue({
-            path: ["admins"],
-            message: "Admins must be members.",
-            code: z.ZodIssueCode.custom,
-        });
+    if (admins) {
+        const nonMembers = admins.filter((admin) => !members.includes(admin));
+        if (nonMembers.length > 0) {
+            ctx.addIssue({
+                path: ["admins"],
+                message: "Admins must be members.",
+                code: z.ZodIssueCode.custom,
+            });
+        }
     }
 });
 export default groupSchema;
