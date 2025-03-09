@@ -1,8 +1,18 @@
 export const corsOptions = {
     credentials: true,
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type"],
+    origin: (origin, callback) => {
+        if (origin === "http://localhost:3000" ||
+            origin === "https://huddle-app-silk.vercel.app") {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
 };
 export const cookieOptions = {
     sameSite: "none",
