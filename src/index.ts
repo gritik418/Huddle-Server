@@ -2,7 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import http from "http";
-import path, { dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import { corsOptions } from "./constants/options.js";
 import connectDB from "./database/index.js";
@@ -20,17 +20,17 @@ import followRequestRoutes from "./routes/follow-request.routes.js";
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const staticPath = path.resolve(__dirname, "../public");
 
 connectDB();
 socketServer(server);
 
 app.use(cors(corsOptions));
-app.use(express.static(path.join(__dirname, "../public")));
-app.use(cookieParser());
-app.use(express.json());
+app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
