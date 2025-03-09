@@ -3,9 +3,8 @@ import { CookieOptions } from "express";
 
 export const corsOptions: CorsOptions = {
   credentials: true,
-  origin: process.env.CLIENT_URL,
+  origin: process.env.CLIENT_URL!,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type"],
 };
 
 export const cookieOptions: CookieOptions = {

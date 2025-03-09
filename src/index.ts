@@ -26,8 +26,8 @@ const __dirname = dirname(__filename);
 connectDB();
 socketServer(server);
 
-app.use(express.static(path.join(__dirname, "../public")));
 app.use(cors(corsOptions));
+app.use(express.static(path.join(__dirname, "../public")));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
