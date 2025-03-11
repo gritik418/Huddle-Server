@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Chat from "../models/Chat.js";
+import Message from "../models/Message.js";
 
 export const getChats = async (
   req: Request,
@@ -66,3 +67,43 @@ export const getChatById = async (
     });
   }
 };
+
+// export const clearChat = async (
+//   req: Request,
+//   res: Response
+// ): Promise<Response> => {
+//   try {
+//     const userId: string = req.params.userId;
+//     const chatId: string = req.params.chatId;
+
+//     if (!userId) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Please Login.",
+//       });
+//     }
+
+//     if (!chatId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Chat Id is required.",
+//       });
+//     }
+
+//     await Message.updateMany({
+//       chatId,
+//     },{
+//       $push: {}
+//     });
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Chat cleared successfully.",
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Unexpected server error. Please try again later.",
+//     });
+//   }
+// };

@@ -25,6 +25,7 @@ export const getUser = async (req, res) => {
             coverImage: 1,
             isPrivate: 1,
             showActiveStatus: 1,
+            allowMentions: 1,
         });
         if (!user || !user._id) {
             return res.status(401).json({
@@ -302,6 +303,38 @@ export const updateActiveStatusVisibility = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Active status visibility updated successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const toggleMentionsAllowance = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const { allowMentions } = req.body;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        if (allowMentions) {
+            await User.findByIdAndUpdate(userId, {
+                $set: { allowMentions: true },
+            });
+        }
+        else {
+            await User.findByIdAndUpdate(userId, {
+                $set: { allowMentions: false },
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Mentions allowance updated successfully.",
         });
     }
     catch (error) {

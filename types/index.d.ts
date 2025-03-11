@@ -9,6 +9,7 @@ interface User {
   profilePicture?: string;
   bio?: string;
   showActiveStatus: boolean;
+  allowMentions: boolean;
   isVerified: boolean;
   isActive: boolean;
   isPrivate: boolean;

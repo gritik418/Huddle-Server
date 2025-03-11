@@ -49,6 +49,10 @@ const UserSchema = new Schema<User>(
       type: Boolean,
       default: true,
     },
+    allowMentions: {
+      type: Boolean,
+      default: true,
+    },
     provider: {
       type: String,
       enum: ["credentials", "google"],

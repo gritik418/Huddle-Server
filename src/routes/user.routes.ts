@@ -7,6 +7,7 @@ import {
   getFollowing,
   getUser,
   getUserByUsername,
+  toggleMentionsAllowance,
   updateAccountPrivacy,
   updateActiveStatusVisibility,
   updateUser,
@@ -61,6 +62,8 @@ router.get("/active", authenticate, getActiveMembers);
 router.get("/:username", authenticate, getUserByUsername);
 
 router.post("/account/privacy", authenticate, updateAccountPrivacy);
+
+router.post("/account/allow-mentions", authenticate, toggleMentionsAllowance);
 
 router.post(
   "/account/active-status-visibility",
