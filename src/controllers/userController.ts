@@ -31,6 +31,8 @@ export const getUser = async (
       blockedUsers: 1,
       profilePicture: 1,
       coverImage: 1,
+      isPrivate: 1,
+      showActiveStatus: 1,
     });
 
     if (!user || !user._id) {
@@ -74,6 +76,7 @@ export const getUserByUsername = async (
       posts: 1,
       profilePicture: 1,
       coverImage: 1,
+      isPrivate: 1,
     });
 
     if (!user || !user._id) {
@@ -282,6 +285,88 @@ export const updateUser = async (
     return res.status(200).json({
       success: true,
       message: "User updated successfully!",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const updateAccountPrivacy = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const { privacy } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!privacy || (privacy !== "private" && privacy !== "public")) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid privacy setting. It should be either 'private' or 'public'.",
+      });
+    }
+
+    if (privacy === "private") {
+      await User.findByIdAndUpdate(userId, {
+        $set: { isPrivate: true },
+      });
+    } else {
+      await User.findByIdAndUpdate(userId, {
+        $set: { isPrivate: false },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Account privacy set to ${privacy} successfully.`,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const updateActiveStatusVisibility = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const { showActiveStatus } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (showActiveStatus) {
+      await User.findByIdAndUpdate(userId, {
+        $set: { showActiveStatus: true },
+      });
+    } else {
+      await User.findByIdAndUpdate(userId, {
+        $set: { showActiveStatus: false },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Active status visibility updated successfully.",
     });
   } catch (error) {
     return res.status(500).json({

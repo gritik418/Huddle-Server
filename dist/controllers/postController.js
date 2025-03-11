@@ -42,7 +42,9 @@ export const addPost = async (req, res) => {
             content: result.data.content,
         });
         const savedPost = await post.save();
-        const user = await User.findById(userId);
+        const user = await User.findByIdAndUpdate(userId, {
+            $push: { posts: savedPost._id },
+        });
         result.data.mentions?.forEach((mention) => {
             const receiverSocket = ConnectedUsers.get(mention.toString());
             if (receiverSocket && receiverSocket?.id) {
@@ -262,6 +264,9 @@ export const deletePost = async (req, res) => {
             });
         }
         await Post.findByIdAndDelete(postId);
+        await User.findByIdAndUpdate(userId, {
+            $pull: { posts: postId },
+        });
         return res.status(200).json({
             success: true,
             message: "Post successfully deleted.",

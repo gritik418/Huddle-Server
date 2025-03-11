@@ -8,6 +8,7 @@ interface User {
   coverImage?: string;
   profilePicture?: string;
   bio?: string;
+  showActiveStatus: boolean;
   isVerified: boolean;
   isActive: boolean;
   isPrivate: boolean;

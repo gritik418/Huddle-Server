@@ -55,7 +55,9 @@ export const addPost = async (
     });
 
     const savedPost = await post.save();
-    const user = await User.findById(userId);
+    const user = await User.findByIdAndUpdate(userId, {
+      $push: { posts: savedPost._id },
+    });
 
     result.data.mentions?.forEach((mention: string) => {
       const receiverSocket: Socket | undefined = ConnectedUsers.get(
@@ -312,6 +314,9 @@ export const deletePost = async (req: Request, res: Response) => {
     }
 
     await Post.findByIdAndDelete(postId);
+    await User.findByIdAndUpdate(userId, {
+      $pull: { posts: postId },
+    });
 
     return res.status(200).json({
       success: true,

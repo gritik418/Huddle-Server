@@ -1,15 +1,17 @@
-import { Router, Request, Response } from "express";
-import authenticate from "../middlewares/authenticate.js";
+import { Request, Response, Router } from "express";
+import multer from "multer";
+import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
 import {
   getActiveMembers,
   getFollowers,
   getFollowing,
   getUser,
   getUserByUsername,
+  updateAccountPrivacy,
+  updateActiveStatusVisibility,
   updateUser,
 } from "../controllers/userController.js";
-import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
-import multer from "multer";
+import authenticate from "../middlewares/authenticate.js";
 
 const router = Router();
 
@@ -57,5 +59,13 @@ router.get("/followers", authenticate, getFollowers);
 router.get("/active", authenticate, getActiveMembers);
 
 router.get("/:username", authenticate, getUserByUsername);
+
+router.post("/account/privacy", authenticate, updateAccountPrivacy);
+
+router.post(
+  "/account/active-status-visibility",
+  authenticate,
+  updateActiveStatusVisibility
+);
 
 export default router;

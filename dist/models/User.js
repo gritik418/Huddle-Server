@@ -43,6 +43,10 @@ const UserSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    showActiveStatus: {
+        type: Boolean,
+        default: true,
+    },
     provider: {
         type: String,
         enum: ["credentials", "google"],
