@@ -1,5 +1,6 @@
 import Chat from "../models/Chat.js";
 import Message from "../models/Message.js";
+import User from "../models/User.js";
 export const getChats = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -76,6 +77,58 @@ export const clearChat = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Chat cleared successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const deleteChat = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const chatId = req.params.chatId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        if (!chatId) {
+            return res.status(400).json({
+                success: false,
+                message: "Chat Id is required.",
+            });
+        }
+        const chat = await Chat.findById(chatId);
+        if (!chat) {
+            return res.status(400).json({
+                success: false,
+                message: "Chat not found.",
+            });
+        }
+        if (chat.isGroupChat) {
+            return res.status(400).json({
+                success: false,
+                message: "Groups cannot be deleted with this method.",
+            });
+        }
+        await Message.deleteMany({ chatId });
+        await Chat.findByIdAndDelete(chatId);
+        const sender = chat?.members.filter((id) => id !== userId)[0];
+        if (sender) {
+            await User.findByIdAndUpdate(userId, {
+                $pull: { chatMembers: sender },
+            });
+            await User.findByIdAndUpdate(sender, {
+                $pull: { chatMembers: userId },
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Chat deleted successfully.",
         });
     }
     catch (error) {
