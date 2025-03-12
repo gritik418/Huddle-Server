@@ -5,6 +5,7 @@ import {
   getActiveMembers,
   getFollowers,
   getFollowing,
+  getPostsByUser,
   getUser,
   getUserByUsername,
   toggleMentionsAllowance,
@@ -17,6 +18,8 @@ import authenticate from "../middlewares/authenticate.js";
 const router = Router();
 
 router.get("/", authenticate, getUser);
+
+router.get("/:id/posts", authenticate, getPostsByUser);
 
 router.put("/", authenticate, function (req: Request, res: Response) {
   uploadUserAvatarOrCoverImage(req, res, function (err) {

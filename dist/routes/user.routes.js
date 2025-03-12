@@ -1,10 +1,11 @@
 import { Router } from "express";
 import multer from "multer";
 import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
-import { getActiveMembers, getFollowers, getFollowing, getUser, getUserByUsername, toggleMentionsAllowance, updateAccountPrivacy, updateActiveStatusVisibility, updateUser, } from "../controllers/userController.js";
+import { getActiveMembers, getFollowers, getFollowing, getPostsByUser, getUser, getUserByUsername, toggleMentionsAllowance, updateAccountPrivacy, updateActiveStatusVisibility, updateUser, } from "../controllers/userController.js";
 import authenticate from "../middlewares/authenticate.js";
 const router = Router();
 router.get("/", authenticate, getUser);
+router.get("/:id/posts", authenticate, getPostsByUser);
 router.put("/", authenticate, function (req, res) {
     uploadUserAvatarOrCoverImage(req, res, function (err) {
         if (err instanceof multer.MulterError) {

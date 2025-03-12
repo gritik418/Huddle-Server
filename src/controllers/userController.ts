@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import updateUserSchema, {
   UpdateUserData,
 } from "../validators/updateUserSchema.js";
+import Post from "../models/Post.js";
 
 export const getUser = async (
   req: Request,
@@ -46,6 +47,31 @@ export const getUser = async (
     return res.status(200).json({
       success: true,
       user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const getPostsByUser = async (req: Request, res: Response) => {
+  try {
+    const id: string = req.params.id;
+
+    const posts = await Post.find({ userId: id });
+
+    if (!posts.length) {
+      return res.status(200).json({
+        success: true,
+        message: "The user hasn't posted anything yet.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      posts,
     });
   } catch (error) {
     return res.status(500).json({
