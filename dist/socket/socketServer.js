@@ -39,6 +39,7 @@ const socketServer = (httpServer) => {
                 username: 1,
                 profilePicture: 1,
                 chatMembers: 1,
+                showActiveStatus: 1,
             });
             socket.user = {
                 id: user._id.toString(),
@@ -47,6 +48,7 @@ const socketServer = (httpServer) => {
                 username: user.username,
                 profilePicture: user.profilePicture || "",
                 chatMembers: user.chatMembers || [],
+                showActiveStatus: user.showActiveStatus,
             };
             next();
         });
@@ -54,18 +56,25 @@ const socketServer = (httpServer) => {
     io.on("connection", (socket) => {
         ConnectedUsers.set(socket.user.id, socket);
         socket.on(USER_ONLINE, async () => {
-            await User.findByIdAndUpdate(socket.user.id, {
-                $set: { isActive: true },
-            });
-            socket.user.chatMembers?.forEach((member) => {
-                const receiver = ConnectedUsers.get(member.toString());
-                if (receiver) {
-                    io.to(receiver.id).emit(STATUS_UPDATE, {
-                        userId: socket.user.id,
-                        status: "ONLINE",
-                    });
-                }
-            });
+            if (socket.user.showActiveStatus) {
+                await User.findByIdAndUpdate(socket.user.id, {
+                    $set: { isActive: true },
+                });
+                socket.user.chatMembers?.forEach((member) => {
+                    const receiver = ConnectedUsers.get(member.toString());
+                    if (receiver) {
+                        io.to(receiver.id).emit(STATUS_UPDATE, {
+                            userId: socket.user.id,
+                            status: "ONLINE",
+                        });
+                    }
+                });
+            }
+            else {
+                await User.findByIdAndUpdate(socket.user.id, {
+                    $set: { isActive: false },
+                });
+            }
         });
         socket.on("reconnect", () => {
             ConnectedUsers.set(socket.user.id, socket);
@@ -75,18 +84,25 @@ const socketServer = (httpServer) => {
         });
         socket.on("disconnect", async () => {
             ConnectedUsers.delete(socket.user.id);
-            await User.findByIdAndUpdate(socket.user.id, {
-                $set: { isActive: false },
-            });
-            socket.user.chatMembers?.forEach((member) => {
-                const receiver = ConnectedUsers.get(member.toString());
-                if (receiver) {
-                    io.to(receiver.id).emit(STATUS_UPDATE, {
-                        userId: socket.user.id,
-                        status: "OFFLINE",
-                    });
-                }
-            });
+            if (socket.user.showActiveStatus) {
+                await User.findByIdAndUpdate(socket.user.id, {
+                    $set: { isActive: false },
+                });
+                socket.user.chatMembers?.forEach((member) => {
+                    const receiver = ConnectedUsers.get(member.toString());
+                    if (receiver) {
+                        io.to(receiver.id).emit(STATUS_UPDATE, {
+                            userId: socket.user.id,
+                            status: "OFFLINE",
+                        });
+                    }
+                });
+            }
+            else {
+                await User.findByIdAndUpdate(socket.user.id, {
+                    $set: { isActive: false },
+                });
+            }
         });
     });
 };

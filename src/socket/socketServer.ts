@@ -59,6 +59,7 @@ const socketServer = (
         username: 1,
         profilePicture: 1,
         chatMembers: 1,
+        showActiveStatus: 1,
       });
 
       socket.user = {
@@ -68,6 +69,7 @@ const socketServer = (
         username: user.username,
         profilePicture: user.profilePicture || "",
         chatMembers: user.chatMembers || [],
+        showActiveStatus: user.showActiveStatus,
       };
       next();
     });
@@ -77,19 +79,25 @@ const socketServer = (
     ConnectedUsers.set(socket.user.id, socket);
 
     socket.on(USER_ONLINE, async () => {
-      await User.findByIdAndUpdate(socket.user.id, {
-        $set: { isActive: true },
-      });
+      if (socket.user.showActiveStatus) {
+        await User.findByIdAndUpdate(socket.user.id, {
+          $set: { isActive: true },
+        });
 
-      socket.user.chatMembers?.forEach((member: string) => {
-        const receiver = ConnectedUsers.get(member.toString());
-        if (receiver) {
-          io.to(receiver.id).emit(STATUS_UPDATE, {
-            userId: socket.user.id,
-            status: "ONLINE",
-          });
-        }
-      });
+        socket.user.chatMembers?.forEach((member: string) => {
+          const receiver = ConnectedUsers.get(member.toString());
+          if (receiver) {
+            io.to(receiver.id).emit(STATUS_UPDATE, {
+              userId: socket.user.id,
+              status: "ONLINE",
+            });
+          }
+        });
+      } else {
+        await User.findByIdAndUpdate(socket.user.id, {
+          $set: { isActive: false },
+        });
+      }
     });
 
     socket.on("reconnect", () => {
@@ -105,19 +113,25 @@ const socketServer = (
 
     socket.on("disconnect", async () => {
       ConnectedUsers.delete(socket.user.id);
-      await User.findByIdAndUpdate(socket.user.id, {
-        $set: { isActive: false },
-      });
+      if (socket.user.showActiveStatus) {
+        await User.findByIdAndUpdate(socket.user.id, {
+          $set: { isActive: false },
+        });
 
-      socket.user.chatMembers?.forEach((member: string) => {
-        const receiver = ConnectedUsers.get(member.toString());
-        if (receiver) {
-          io.to(receiver.id).emit(STATUS_UPDATE, {
-            userId: socket.user.id,
-            status: "OFFLINE",
-          });
-        }
-      });
+        socket.user.chatMembers?.forEach((member: string) => {
+          const receiver = ConnectedUsers.get(member.toString());
+          if (receiver) {
+            io.to(receiver.id).emit(STATUS_UPDATE, {
+              userId: socket.user.id,
+              status: "OFFLINE",
+            });
+          }
+        });
+      } else {
+        await User.findByIdAndUpdate(socket.user.id, {
+          $set: { isActive: false },
+        });
+      }
     });
   });
 };

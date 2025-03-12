@@ -60,7 +60,10 @@ export const getPostsByUser = async (req: Request, res: Response) => {
   try {
     const id: string = req.params.id;
 
-    const posts = await Post.find({ userId: id });
+    const posts = await Post.find({ userId: id }).populate(
+      "userId",
+      "_id firstName lastName username coverImage profilePicture"
+    );
 
     if (!posts.length) {
       return res.status(200).json({
@@ -387,7 +390,7 @@ export const updateActiveStatusVisibility = async (
       });
     } else {
       await User.findByIdAndUpdate(userId, {
-        $set: { showActiveStatus: false },
+        $set: { showActiveStatus: false, isActive: false },
       });
     }
 

@@ -26,6 +26,12 @@ const MessageSchema = new Schema({
     readAt: {
         type: Date,
     },
+    deletedFor: [
+        {
+            type: Types.ObjectId,
+            ref: "User",
+        },
+    ],
 });
 const Message = mongoose.models.Message || mongoose.model("Message", MessageSchema);
 export default Message;

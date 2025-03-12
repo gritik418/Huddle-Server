@@ -27,6 +27,12 @@ const MessageSchema = new Schema<Message>({
   readAt: {
     type: Date,
   },
+  deletedFor: [
+    {
+      type: Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 const Message: Model<Message> =

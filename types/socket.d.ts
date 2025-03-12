@@ -9,6 +9,7 @@ declare module "socket.io" {
       username: string;
       profilePicture?: string;
       chatMembers?: string[];
+      showActiveStatus: boolean;
     };
   }
 }
