@@ -30,3 +30,41 @@ export const getMessages = async (
     });
   }
 };
+
+export const deleteForMe = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const messageId: string = req.params.messageId;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: "Message not found.",
+      });
+    }
+
+    await Message.findByIdAndUpdate(messageId, {
+      $addToSet: { deletedFor: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Message marked as deleted for you.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
