@@ -442,3 +442,49 @@ export const toggleMentionsAllowance = async (
     });
   }
 };
+
+export const getUsersForMention = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    const user: User | null = await User.findById(userId)
+      .select({
+        following: 1,
+        _id: 1,
+      })
+      .populate(
+        "following",
+        "_id firstName lastName username profilePicture allowMentions"
+      );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const usersAllowingMentions = user.following.filter(
+      (followedUser) => followedUser.allowMentions
+    );
+
+    return res.status(200).json({
+      success: true,
+      users: usersAllowingMentions,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};

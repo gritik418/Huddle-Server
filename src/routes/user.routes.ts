@@ -8,6 +8,7 @@ import {
   getPostsByUser,
   getUser,
   getUserByUsername,
+  getUsersForMention,
   toggleMentionsAllowance,
   updateAccountPrivacy,
   updateActiveStatusVisibility,
@@ -20,6 +21,8 @@ const router = Router();
 router.get("/", authenticate, getUser);
 
 router.get("/:id/posts", authenticate, getPostsByUser);
+
+router.get("/mentions", authenticate, getUsersForMention);
 
 router.put("/", authenticate, function (req: Request, res: Response) {
   uploadUserAvatarOrCoverImage(req, res, function (err) {
