@@ -27,20 +27,6 @@ connectDB();
 socketServer(server);
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL!);
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
-  );
-  next();
-});
 app.use(cookieParser());
 app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: false }));
