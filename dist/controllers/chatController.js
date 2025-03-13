@@ -13,6 +13,7 @@ export const getChats = async (req, res) => {
             members: { $in: [userId] },
         })
             .populate("members", "_id firstName lastName username profilePicture")
+            .populate("lastMessage", "content sender")
             .sort({ updatedAt: -1 });
         return res.status(200).json({
             success: true,

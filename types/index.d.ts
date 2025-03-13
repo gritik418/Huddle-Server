@@ -25,31 +25,6 @@ interface User {
   passwordResetTokenExpiry?: Date;
 }
 
-// Not Implemented
-interface UserSettings {
-  userId: string;
-
-  privacy: {
-    isPrivate: boolean;
-    showActiveStatus: boolean;
-    allowMentions: boolean;
-  };
-
-  notifications: {
-    chatNotifications: boolean;
-    followRequestNotifications: boolean;
-    chatRequestNotifications: boolean;
-  };
-
-  appearance: {
-    theme: "light" | "dark";
-  };
-
-  account: {
-    connectedAccounts: string[];
-  };
-}
-
 interface Post {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
@@ -89,7 +64,7 @@ interface Chat {
   groupIcon?: string;
   members: Types.ObjectId[];
   admins?: Types.ObjectId[];
-  lastMessage?: string;
+  lastMessage?: Types.ObjectId;
   groupStatus?: "active" | "deleted";
   deletedAt?: Date;
   deletedBy?: Types.ObjectId;

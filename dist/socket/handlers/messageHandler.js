@@ -1,6 +1,7 @@
 import Message from "../../models/Message.js";
 import { ConnectedUsers } from "../socketServer.js";
 import { MESSAGE_SENT, NEW_MESSAGE } from "../../constants/events.js";
+import Chat from "../../models/Chat.js";
 export const sendMessageHandler = async (io, socket, message, chat) => {
     try {
         const newMessage = new Message({
@@ -13,6 +14,9 @@ export const sendMessageHandler = async (io, socket, message, chat) => {
             status: "sent",
         });
         const savedMessage = await newMessage.save();
+        await Chat.findByIdAndUpdate(chat._id, {
+            $set: { lastMessage: savedMessage._id },
+        });
         const modifiedMessage = {
             _id: savedMessage._id.toString(),
             chatId: message.chatId,
