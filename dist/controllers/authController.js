@@ -127,7 +127,8 @@ export const userLogin = async (req, res) => {
             email: user.email,
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET);
-        return res.status(200).cookie(HUDDLE_TOKEN, token, cookieOptions).json({
+        res.cookie(HUDDLE_TOKEN, token, cookieOptions);
+        return res.status(200).json({
             success: true,
             message: "Logged in successfully.",
         });
@@ -177,7 +178,8 @@ export const verifyEmail = async (req, res) => {
             email: user.email,
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET);
-        return res.status(200).cookie(HUDDLE_TOKEN, token, cookieOptions).json({
+        res.cookie(HUDDLE_TOKEN, token, cookieOptions);
+        return res.status(200).json({
             success: true,
             message: "Email verified successfully!",
         });
