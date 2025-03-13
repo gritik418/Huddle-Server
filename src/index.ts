@@ -27,10 +27,10 @@ connectDB();
 socketServer(server);
 
 app.use(cors(corsOptions));
-app.use(cookieParser());
 app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
