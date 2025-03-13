@@ -199,10 +199,12 @@ export const getPostsByFollowing = async (req: Request, res: Response) => {
 
     const posts = await Post.find({
       userId: { $in: user.following },
-    }).populate(
-      "userId",
-      "_id firstName lastName username coverImage profilePicture"
-    );
+    })
+      .populate(
+        "userId",
+        "_id firstName lastName username coverImage profilePicture"
+      )
+      .sort({ createdAt: -1 });
 
     if (!posts || posts.length === 0) {
       return res.status(200).json({
@@ -236,7 +238,7 @@ export const getFeed = async (req: Request, res: Response) => {
     }
 
     const publicUsers = await User.find({
-      isPrivate: false,
+      $or: [{ isPrivate: false }, { followers: { $in: [userId] } }],
       _id: { $ne: userId },
     }).select({
       _id: 1,
