@@ -2,14 +2,9 @@ import { CorsOptions } from "cors";
 import { CookieOptions } from "express";
 
 export const corsOptions: CorsOptions = {
+  origin: process.env.CLIENT_URL,
   credentials: true,
-  origin: ["http://localhost:3000", "https://huddle-app-silk.vercel.app"],
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: [
-    "Access-Control-Allow-Credentials",
-    "Access-Control-Allow-Headers",
-  ],
-  preflightContinue: true,
 };
 
 export const cookieOptions: CookieOptions = {
