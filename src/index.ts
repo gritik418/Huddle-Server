@@ -27,12 +27,6 @@ connectDB();
 socketServer(server);
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-app.use(express.static(staticPath));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(cookieParser());
-
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", process.env.CLIENT_URL!);
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -43,6 +37,11 @@ app.use((req, res, next) => {
 
   next();
 });
+app.options("*", cors(corsOptions));
+app.use(express.static(staticPath));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
