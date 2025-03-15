@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
+import Post from "../models/Post.js";
 
 export const search = async (
   req: Request,
@@ -61,12 +62,42 @@ export const search = async (
           },
         });
 
-      case "channels":
-        const channels: [] = [];
+      case "hashtags":
+        const totalPosts = await Post.countDocuments({
+          $or: [
+            { isPrivate: false },
+            { followers: { $in: [userId] } },
+            { userId: { $eq: userId } },
+          ],
+          hashtags: { $in: [`#${searchQuery}`] },
+        });
+
+        const totalPostPages = Math.ceil(totalPosts / +limit);
+
+        const posts = await Post.find({
+          $or: [
+            { isPrivate: false },
+            { followers: { $in: [userId] } },
+            { userId: { $eq: userId } },
+          ],
+          hashtags: { $in: [`#${searchQuery}`] },
+        })
+          .skip((+page - 1) * +limit)
+          .limit(+limit)
+          .sort({ createdAt: -1 })
+          .populate(
+            "userId",
+            "_id firstName lastName username coverImage profilePicture"
+          );
 
         return res.status(200).json({
           success: true,
-          channels,
+          posts,
+          pagination: {
+            page: +page,
+            limit: +limit,
+            totalPostPages,
+          },
         });
     }
 
