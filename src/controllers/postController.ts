@@ -181,6 +181,8 @@ export const getPostById = async (req: Request, res: Response) => {
 export const getPostsByFollowing = async (req: Request, res: Response) => {
   try {
     const userId: string = req.params.userId;
+    const { page = 1, limit = 20 } = req.query;
+
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -197,9 +199,17 @@ export const getPostsByFollowing = async (req: Request, res: Response) => {
       });
     }
 
+    const totalPosts = await Post.countDocuments({
+      userId: { $in: user.following },
+    });
+
+    const totalPages = Math.ceil(totalPosts / +limit);
+
     const posts = await Post.find({
       userId: { $in: user.following },
     })
+      .skip((+page - 1) * +limit)
+      .limit(+limit)
       .populate(
         "userId",
         "_id firstName lastName username coverImage profilePicture"
@@ -216,6 +226,11 @@ export const getPostsByFollowing = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       posts,
+      pagination: {
+        page: +page,
+        limit: +limit,
+        totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({

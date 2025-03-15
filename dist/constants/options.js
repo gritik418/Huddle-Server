@@ -1,6 +1,5 @@
 export const corsOptions = {
-    // origin: process.env.CLIENT_URL,
-    origin: ["http://localhost:3000", "https://huddle-app-silk.vercel.app"],
+    origin: process.env.CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 };
