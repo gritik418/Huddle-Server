@@ -104,6 +104,12 @@ interface Attachment {
   size: number;
 }
 
+interface Pulse {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  content: Types.ObjectId;
+}
+
 interface JWT_Payload {
   id: string;
   email: string;
