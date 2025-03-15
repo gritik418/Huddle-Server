@@ -53,36 +53,68 @@ export const search = async (req, res) => {
                     },
                 });
             case "hashtags":
-                const totalPosts = await Post.countDocuments({
-                    $or: [
-                        { isPrivate: false },
-                        { followers: { $in: [userId] } },
-                        { userId: { $eq: userId } },
-                    ],
-                    hashtags: { $in: [`#${searchQuery}`] },
-                });
-                const totalPostPages = Math.ceil(totalPosts / +limit);
-                const posts = await Post.find({
-                    $or: [
-                        { isPrivate: false },
-                        { followers: { $in: [userId] } },
-                        { userId: { $eq: userId } },
-                    ],
-                    hashtags: { $in: [`#${searchQuery}`] },
-                })
-                    .skip((+page - 1) * +limit)
-                    .limit(+limit)
-                    .sort({ createdAt: -1 })
-                    .populate("userId", "_id firstName lastName username coverImage profilePicture");
-                return res.status(200).json({
-                    success: true,
-                    posts,
-                    pagination: {
-                        page: +page,
-                        limit: +limit,
-                        totalPostPages,
-                    },
-                });
+                if (searchQuery) {
+                    const totalPosts = await Post.countDocuments({
+                        $or: [
+                            { isPrivate: false },
+                            { followers: { $in: [userId] } },
+                            { userId: { $eq: userId } },
+                        ],
+                        hashtags: { $in: [`#${searchQuery}`] },
+                    });
+                    const totalPostPages = Math.ceil(totalPosts / +limit);
+                    const posts = await Post.find({
+                        $or: [
+                            { isPrivate: false },
+                            { followers: { $in: [userId] } },
+                            { userId: { $eq: userId } },
+                        ],
+                        hashtags: { $in: [`#${searchQuery}`] },
+                    })
+                        .skip((+page - 1) * +limit)
+                        .limit(+limit)
+                        .sort({ createdAt: -1 })
+                        .populate("userId", "_id firstName lastName username coverImage profilePicture");
+                    return res.status(200).json({
+                        success: true,
+                        posts,
+                        pagination: {
+                            page: +page,
+                            limit: +limit,
+                            totalPages: totalPostPages,
+                        },
+                    });
+                }
+                else {
+                    const totalPosts = await Post.countDocuments({
+                        $or: [
+                            { isPrivate: false },
+                            { followers: { $in: [userId] } },
+                            { userId: { $eq: userId } },
+                        ],
+                    });
+                    const totalPostPages = Math.ceil(totalPosts / +limit);
+                    const posts = await Post.find({
+                        $or: [
+                            { isPrivate: false },
+                            { followers: { $in: [userId] } },
+                            { userId: { $eq: userId } },
+                        ],
+                    })
+                        .skip((+page - 1) * +limit)
+                        .limit(+limit)
+                        .sort({ createdAt: -1 })
+                        .populate("userId", "_id firstName lastName username coverImage profilePicture");
+                    return res.status(200).json({
+                        success: true,
+                        posts,
+                        pagination: {
+                            page: +page,
+                            limit: +limit,
+                            totalPages: totalPostPages,
+                        },
+                    });
+                }
         }
         return res.status(400).json({
             success: false,
