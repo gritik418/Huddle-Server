@@ -122,3 +122,39 @@ export const addPulse = async (
     });
   }
 };
+
+export const deletePulse = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const pulseId: string = req.params.pulseId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!pulseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Pulse Id is required.",
+      });
+    }
+
+    await Pulse.findByIdAndDelete(pulseId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Pulse deleted.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
