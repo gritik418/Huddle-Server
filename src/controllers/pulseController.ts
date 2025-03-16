@@ -23,6 +23,10 @@ export const getAllPulses = async (
     const pulses = await Pulse.find()
       .skip((+page - 1) * +limit)
       .limit(+limit)
+      .populate(
+        "userId",
+        "_id firstName lastName username coverImage profilePicture"
+      )
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
