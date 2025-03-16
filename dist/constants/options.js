@@ -2,6 +2,7 @@ export const corsOptions = {
     origin: process.env.CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    preflightContinue: false,
 };
 export const cookieOptions = {
     httpOnly: true,

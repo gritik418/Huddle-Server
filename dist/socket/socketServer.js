@@ -41,6 +41,8 @@ const socketServer = (httpServer) => {
                 chatMembers: 1,
                 showActiveStatus: 1,
             });
+            if (!user)
+                return next(new Error("Authentication failed!"));
             socket.user = {
                 id: user._id.toString(),
                 firstName: user.firstName,
