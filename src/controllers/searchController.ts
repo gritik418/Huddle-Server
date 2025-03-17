@@ -69,7 +69,9 @@ export const search = async (
             { followers: { $in: [userId] } },
             { userId: { $eq: userId } },
           ],
-          hashtags: { $in: [`#${searchQuery}`] },
+          hashtags: {
+            $elemMatch: { $regex: searchQuery, $options: "i" },
+          },
         });
 
         const totalPostPages = Math.ceil(totalPosts / +limit);
@@ -81,7 +83,7 @@ export const search = async (
             { userId: { $eq: userId } },
           ],
           hashtags: {
-            $in: { $regex: searchQuery, $options: "i" },
+            $elemMatch: { $regex: searchQuery, $options: "i" },
           },
         })
           .skip((+page - 1) * +limit)
