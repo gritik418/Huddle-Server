@@ -216,7 +216,7 @@ export const getFeed = async (req, res) => {
         }
         const publicUsers = await User.find({
             $or: [{ isPrivate: false }, { followers: { $in: [userId] } }],
-            _id: { $ne: userId },
+            _id: { $eq: userId },
         }).select({
             _id: 1,
         });

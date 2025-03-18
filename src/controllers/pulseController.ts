@@ -113,10 +113,11 @@ export const addPulse = async (
       content,
     });
 
-    await pulse.save();
+    const savedPulse = await pulse.save();
 
     return res.status(201).json({
       success: true,
+      savedPulse,
       message: "Your Pulse has been posted successfully.",
     });
   } catch (error) {
