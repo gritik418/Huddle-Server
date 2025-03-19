@@ -48,7 +48,8 @@ export const getUserPulses = async (req, res) => {
         const pulses = await Pulse.find({ userId })
             .skip((+page - 1) * +limit)
             .limit(+limit)
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .populate("userId", "_id firstName lastName username coverImage profilePicture");
         return res.status(200).json({
             success: true,
             pulses,

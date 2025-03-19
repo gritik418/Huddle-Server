@@ -488,3 +488,59 @@ export const getUsersForMention = async (
     });
   }
 };
+
+export const unfollow = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const followingId: string = req.params.followingId;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!followingId)
+      return res.status(400).json({
+        success: false,
+        message: "Following user's id is required.",
+      });
+
+    const following = await User.findById(followingId);
+    if (!following) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user || !user.following.includes(followingId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not following this user.",
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { following: followingId },
+    });
+
+    await User.findByIdAndUpdate(followingId, {
+      $pull: { followers: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully unfollowed.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};

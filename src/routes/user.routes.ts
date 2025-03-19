@@ -10,6 +10,7 @@ import {
   getUserByUsername,
   getUsersForMention,
   toggleMentionsAllowance,
+  unfollow,
   updateAccountPrivacy,
   updateActiveStatusVisibility,
   updateUser,
@@ -76,5 +77,7 @@ router.post(
   authenticate,
   updateActiveStatusVisibility
 );
+
+router.delete("/:followingId/unfollow", authenticate, unfollow);
 
 export default router;
