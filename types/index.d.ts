@@ -114,3 +114,27 @@ interface JWT_Payload {
   id: string;
   email: string;
 }
+
+interface Channel {
+  _id: Types.ObjectId;
+  name: string;
+  description: string;
+  type: "public" | "private" | "invite-only";
+  creatorId: Types.ObjectId;
+  members: Types.ObjectId[];
+  isActive: boolean;
+  sendMessagePermission: "creator" | "members" | "everyone";
+}
+
+enum JoinRequestStatus {
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+}
+
+interface JoinRequest {
+  _id: Types.ObjectId;
+  userId: string;
+  channelId: string;
+  status: JoinRequestStatus;
+}
