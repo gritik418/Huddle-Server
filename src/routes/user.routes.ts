@@ -4,6 +4,7 @@ import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
 import {
   blockUser,
   getActiveMembers,
+  getBlockedUsers,
   getFollowers,
   getFollowing,
   getPostsByUser,
@@ -67,6 +68,8 @@ router.get("/following", authenticate, getFollowing);
 router.get("/followers", authenticate, getFollowers);
 
 router.get("/active", authenticate, getActiveMembers);
+
+router.get("/block", authenticate, getBlockedUsers);
 
 router.get("/:username", authenticate, getUserByUsername);
 

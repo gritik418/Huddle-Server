@@ -28,6 +28,7 @@ export const search = async (
           ],
           _id: { $ne: userId },
           isVerified: true,
+          blockedUsers: { $ne: userId },
         });
 
         const totalPages = Math.ceil(totalUsers / +limit);
@@ -46,6 +47,7 @@ export const search = async (
           ],
           _id: { $ne: userId },
           isVerified: true,
+          blockedUsers: { $ne: userId },
         })
           .select("_id firstName lastName username profilePicture")
           .skip((+page - 1) * +limit)

@@ -535,7 +535,39 @@ export const unblockUser = async (req, res) => {
         });
         return res.status(200).json({
             success: true,
-            message: "User Unblocked successfully.",
+            message: "User unblocked successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const getBlockedUsers = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        const user = await User.findById(userId)
+            .select({
+            blockedUsers: 1,
+            _id: 0,
+        })
+            .populate("blockedUsers", "_id firstName lastName username email profilePicture coverImage");
+        if (!user)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        const blockedUsers = user.blockedUsers || [];
+        return res.status(200).json({
+            success: true,
+            blockedUsers,
         });
     }
     catch (error) {
