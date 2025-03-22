@@ -4,6 +4,8 @@ import updateUserSchema, {
   UpdateUserData,
 } from "../validators/updateUserSchema.js";
 import Post from "../models/Post.js";
+import Chat from "../models/Chat.js";
+import Message from "../models/Message.js";
 
 export const getUser = async (
   req: Request,
@@ -536,6 +538,71 @@ export const unfollow = async (
     return res.status(200).json({
       success: true,
       message: "Successfully unfollowed.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const blockUser = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const id: string = req.params.id;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!id)
+      return res.status(400).json({
+        success: false,
+        message: "User id is required.",
+      });
+
+    const userToBeBlocked = await User.findById(id);
+    if (!userToBeBlocked) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (user.blockedUsers.includes(id)) {
+      return res.status(200).json({
+        success: true,
+        message: "User blocked successfully.",
+      });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $push: { blockedUsers: id },
+      $pull: { followers: id, following: id },
+    });
+
+    await User.findByIdAndUpdate(id, {
+      $pull: { followers: userId, following: userId },
+    });
+
+    const chat = await Chat.findOneAndDelete({
+      members: { $all: [id, userId], $size: 2 },
+    });
+
+    if (chat) {
+      await Message.deleteMany({ chatId: chat._id });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User blocked successfully.",
     });
   } catch (error) {
     return res.status(500).json({

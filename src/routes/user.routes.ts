@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import multer from "multer";
 import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
 import {
+  blockUser,
   getActiveMembers,
   getFollowers,
   getFollowing,
@@ -79,5 +80,7 @@ router.post(
 );
 
 router.delete("/:followingId/unfollow", authenticate, unfollow);
+
+router.post("/:id/block", authenticate, blockUser);
 
 export default router;
