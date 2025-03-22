@@ -502,3 +502,46 @@ export const blockUser = async (req, res) => {
         });
     }
 };
+export const unblockUser = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const id = req.params.id;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        if (!id)
+            return res.status(400).json({
+                success: false,
+                message: "User id is required.",
+            });
+        const userToBeUnBlocked = await User.findById(id);
+        if (!userToBeUnBlocked) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        const user = await User.findById(userId);
+        if (!user.blockedUsers.includes(id)) {
+            return res.status(200).json({
+                success: true,
+                message: "This user is not in your blocked list.",
+            });
+        }
+        await User.findByIdAndUpdate(userId, {
+            $pull: { blockedUsers: id },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "User Unblocked successfully.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};

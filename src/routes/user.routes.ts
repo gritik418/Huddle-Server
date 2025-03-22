@@ -11,6 +11,7 @@ import {
   getUserByUsername,
   getUsersForMention,
   toggleMentionsAllowance,
+  unblockUser,
   unfollow,
   updateAccountPrivacy,
   updateActiveStatusVisibility,
@@ -82,5 +83,7 @@ router.post(
 router.delete("/:followingId/unfollow", authenticate, unfollow);
 
 router.post("/:id/block", authenticate, blockUser);
+
+router.post("/:id/unblock", authenticate, unblockUser);
 
 export default router;

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { uploadUserAvatarOrCoverImage } from "../config/multerConfig.js";
-import { blockUser, getActiveMembers, getFollowers, getFollowing, getPostsByUser, getUser, getUserByUsername, getUsersForMention, toggleMentionsAllowance, unfollow, updateAccountPrivacy, updateActiveStatusVisibility, updateUser, } from "../controllers/userController.js";
+import { blockUser, getActiveMembers, getFollowers, getFollowing, getPostsByUser, getUser, getUserByUsername, getUsersForMention, toggleMentionsAllowance, unblockUser, unfollow, updateAccountPrivacy, updateActiveStatusVisibility, updateUser, } from "../controllers/userController.js";
 import authenticate from "../middlewares/authenticate.js";
 const router = Router();
 router.get("/", authenticate, getUser);
@@ -51,4 +51,5 @@ router.post("/account/allow-mentions", authenticate, toggleMentionsAllowance);
 router.post("/account/active-status-visibility", authenticate, updateActiveStatusVisibility);
 router.delete("/:followingId/unfollow", authenticate, unfollow);
 router.post("/:id/block", authenticate, blockUser);
+router.post("/:id/unblock", authenticate, unblockUser);
 export default router;
