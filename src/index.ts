@@ -14,6 +14,7 @@ import postRoutes from "./routes/post.routes.js";
 import pulseRoutes from "./routes/pulse.routes.js";
 import groupRoutes from "./routes/group.routes.js";
 import searchRoutes from "./routes/search.routes.js";
+import channelRoutes from "./routes/channel.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import chatRequestRoutes from "./routes/chat-request.routes.js";
 import followRequestRoutes from "./routes/follow-request.routes.js";
@@ -41,6 +42,7 @@ app.use("/api/pulse", pulseRoutes);
 app.use("/api/group", groupRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/channel", channelRoutes);
 app.use("/api/chat-requests", chatRequestRoutes);
 app.use("/api/follow-requests", followRequestRoutes);
 
