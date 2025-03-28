@@ -51,3 +51,25 @@ export const createChannel = async (req, res) => {
         });
     }
 };
+export const getUserChannels = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        const channels = await Channel.find({ creatorId: userId });
+        return res.status(200).json({
+            success: true,
+            channels,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
