@@ -75,15 +75,17 @@ export const createChannel = async (
       description,
       sendMessagePermission,
       type,
+      members: [userId],
       creatorId: userId,
       isActive: true,
     });
 
-    await channel.save();
+    const savedChannel = await channel.save();
 
     return res.status(201).json({
       success: true,
       message: "Channel has been successfully created.",
+      channel: savedChannel,
     });
   } catch (error) {
     return res.status(500).json({

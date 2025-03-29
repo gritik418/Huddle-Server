@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/User.js";
 import Post from "../models/Post.js";
+import Channel from "../models/Channel.js";
 
 export const search = async (
   req: Request,
@@ -103,6 +104,36 @@ export const search = async (
             page: +page,
             limit: +limit,
             totalPages: totalPostPages,
+          },
+        });
+
+      case "channels":
+        const totalChannels = await Channel.countDocuments({
+          isActive: true,
+          name: { $regex: searchQuery, $options: "i" },
+        });
+
+        const totalChannelPages = Math.ceil(totalChannels / +limit);
+
+        const channels: Channel[] = await Channel.find({
+          isActive: true,
+          name: { $regex: searchQuery, $options: "i" },
+        })
+          .populate(
+            "creatorId",
+            "_id firstName lastName username profilePicture"
+          )
+          .skip((+page - 1) * +limit)
+          .limit(+limit)
+          .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+          success: true,
+          channels,
+          pagination: {
+            page: +page,
+            limit: +limit,
+            totalPages: totalChannelPages,
           },
         });
     }
