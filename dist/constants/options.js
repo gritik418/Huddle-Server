@@ -3,6 +3,7 @@ export const corsOptions = {
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     preflightContinue: false,
+    allowedHeaders: ["Authorization", "Content-Type", "Set-Cookie"],
 };
 export const cookieOptions = {
     httpOnly: true,

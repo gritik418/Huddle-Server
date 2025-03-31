@@ -6,8 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --env-file=.env dist/index.js",
-    "dev": "tsc-watch --onSuccess \"npm start\""
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc-watch --onSuccess \"node --env-file=.env dist/index.js\""
   },
   "author": "Ritik",
   "license": "ISC",
