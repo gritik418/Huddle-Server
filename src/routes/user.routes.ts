@@ -11,6 +11,7 @@ import {
   getUser,
   getUserByUsername,
   getUsersForMention,
+  removeFollower,
   toggleMentionsAllowance,
   unblockUser,
   unfollow,
@@ -84,6 +85,8 @@ router.post(
 );
 
 router.delete("/:followingId/unfollow", authenticate, unfollow);
+
+router.delete("/:followerId/remove", authenticate, removeFollower);
 
 router.post("/:id/block", authenticate, blockUser);
 

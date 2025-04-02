@@ -138,7 +138,15 @@ export const getChannelById = async (
       });
     }
 
-    const channel = await Channel.findById(channelId);
+    const channel = await Channel.findById(channelId)
+      .populate(
+        "members",
+        "_id firstName lastName username profilePicture coverImage"
+      )
+      .populate(
+        "creatorId",
+        "_id firstName lastName username profilePicture coverImage"
+      );
 
     if (!channel) {
       return res.status(400).json({

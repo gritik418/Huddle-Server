@@ -577,3 +577,49 @@ export const getBlockedUsers = async (req, res) => {
         });
     }
 };
+export const removeFollower = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const followerId = req.params.followerId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        if (!followerId)
+            return res.status(400).json({
+                success: false,
+                message: "Follower's id is required.",
+            });
+        const follower = await User.findById(followerId);
+        if (!follower) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+        const user = await User.findById(userId);
+        if (!user || !user.followers.includes(followerId)) {
+            return res.status(400).json({
+                success: false,
+                message: "This user is not in your followers.",
+            });
+        }
+        await User.findByIdAndUpdate(userId, {
+            $pull: { followers: followerId },
+        });
+        await User.findByIdAndUpdate(followerId, {
+            $pull: { following: userId },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Successfully removed.",
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
