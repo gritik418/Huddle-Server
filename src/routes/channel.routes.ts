@@ -4,6 +4,7 @@ import {
   createChannel,
   getAllChannels,
   getChannelById,
+  getJoinedChannels,
   getUserChannels,
 } from "../controllers/channelController.js";
 
@@ -14,6 +15,8 @@ router.post("/", authenticate, createChannel);
 router.get("/", authenticate, getAllChannels);
 
 router.get("/me", authenticate, getUserChannels);
+
+router.get("/joined", authenticate, getJoinedChannels);
 
 router.get("/:channelId", authenticate, getChannelById);
 
