@@ -173,6 +173,7 @@ export const getJoinedChannels = async (
 ): Promise<Response> => {
   try {
     const userId: string = req.params.userId;
+    const { page = 1, limit = 20 } = req.query;
 
     if (!userId) {
       return res.status(401).json({
@@ -180,6 +181,11 @@ export const getJoinedChannels = async (
         message: "Please Login.",
       });
     }
+    const totalChannels = await Channel.countDocuments({
+      members: { $in: userId },
+    });
+
+    const totalPages = Math.ceil(totalChannels / +limit);
 
     const channels = await Channel.find({
       members: { $in: userId },
@@ -191,7 +197,10 @@ export const getJoinedChannels = async (
       .populate(
         "creatorId",
         "_id firstName lastName username profilePicture coverImage"
-      );
+      )
+      .skip((+page - 1) * +limit)
+      .limit(+limit)
+      .sort({ createdAt: -1 });
 
     if (!channels || channels.length === 0) {
       return res.status(400).json({
@@ -203,6 +212,11 @@ export const getJoinedChannels = async (
     return res.status(200).json({
       success: true,
       channels,
+      pagination: {
+        page: +page,
+        limit: +limit,
+        totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -218,6 +232,7 @@ export const getCreatedChannels = async (
 ): Promise<Response> => {
   try {
     const userId: string = req.params.userId;
+    const { page = 1, limit = 20 } = req.query;
 
     if (!userId) {
       return res.status(401).json({
@@ -225,6 +240,12 @@ export const getCreatedChannels = async (
         message: "Please Login.",
       });
     }
+
+    const totalChannels = await Channel.countDocuments({
+      creatorId: userId,
+    });
+
+    const totalPages = Math.ceil(totalChannels / +limit);
 
     const channels = await Channel.find({
       creatorId: userId,
@@ -236,7 +257,10 @@ export const getCreatedChannels = async (
       .populate(
         "creatorId",
         "_id firstName lastName username profilePicture coverImage"
-      );
+      )
+      .skip((+page - 1) * +limit)
+      .limit(+limit)
+      .sort({ createdAt: -1 });
 
     if (!channels || channels.length === 0) {
       return res.status(400).json({
@@ -248,6 +272,11 @@ export const getCreatedChannels = async (
     return res.status(200).json({
       success: true,
       channels,
+      pagination: {
+        page: +page,
+        limit: +limit,
+        totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({

@@ -131,17 +131,25 @@ export const getChannelById = async (req, res) => {
 export const getJoinedChannels = async (req, res) => {
     try {
         const userId = req.params.userId;
+        const { page = 1, limit = 20 } = req.query;
         if (!userId) {
             return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
         }
+        const totalChannels = await Channel.countDocuments({
+            members: { $in: userId },
+        });
+        const totalPages = Math.ceil(totalChannels / +limit);
         const channels = await Channel.find({
             members: { $in: userId },
         })
             .populate("members", "_id firstName lastName username profilePicture coverImage")
-            .populate("creatorId", "_id firstName lastName username profilePicture coverImage");
+            .populate("creatorId", "_id firstName lastName username profilePicture coverImage")
+            .skip((+page - 1) * +limit)
+            .limit(+limit)
+            .sort({ createdAt: -1 });
         if (!channels || channels.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -151,6 +159,11 @@ export const getJoinedChannels = async (req, res) => {
         return res.status(200).json({
             success: true,
             channels,
+            pagination: {
+                page: +page,
+                limit: +limit,
+                totalPages,
+            },
         });
     }
     catch (error) {
@@ -163,17 +176,25 @@ export const getJoinedChannels = async (req, res) => {
 export const getCreatedChannels = async (req, res) => {
     try {
         const userId = req.params.userId;
+        const { page = 1, limit = 20 } = req.query;
         if (!userId) {
             return res.status(401).json({
                 success: false,
                 message: "Please Login.",
             });
         }
+        const totalChannels = await Channel.countDocuments({
+            creatorId: userId,
+        });
+        const totalPages = Math.ceil(totalChannels / +limit);
         const channels = await Channel.find({
             creatorId: userId,
         })
             .populate("members", "_id firstName lastName username profilePicture coverImage")
-            .populate("creatorId", "_id firstName lastName username profilePicture coverImage");
+            .populate("creatorId", "_id firstName lastName username profilePicture coverImage")
+            .skip((+page - 1) * +limit)
+            .limit(+limit)
+            .sort({ createdAt: -1 });
         if (!channels || channels.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -183,6 +204,11 @@ export const getCreatedChannels = async (req, res) => {
         return res.status(200).json({
             success: true,
             channels,
+            pagination: {
+                page: +page,
+                limit: +limit,
+                totalPages,
+            },
         });
     }
     catch (error) {
