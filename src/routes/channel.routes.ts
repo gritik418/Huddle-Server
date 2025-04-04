@@ -4,6 +4,7 @@ import {
   createChannel,
   getAllChannels,
   getChannelById,
+  getChannelChats,
   getCreatedChannels,
   getJoinedChannels,
   getUserChannels,
@@ -20,6 +21,8 @@ router.get("/me", authenticate, getUserChannels);
 router.get("/joined", authenticate, getJoinedChannels);
 
 router.get("/created", authenticate, getCreatedChannels);
+
+router.get("/chats", authenticate, getChannelChats);
 
 router.get("/:channelId", authenticate, getChannelById);
 

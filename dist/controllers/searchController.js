@@ -101,6 +101,7 @@ export const search = async (req, res) => {
                     name: { $regex: searchQuery, $options: "i" },
                 })
                     .populate("creatorId", "_id firstName lastName username profilePicture")
+                    .populate("members", "_id firstName lastName username profilePicture coverImage")
                     .skip((+page - 1) * +limit)
                     .limit(+limit)
                     .sort({ createdAt: -1 });
