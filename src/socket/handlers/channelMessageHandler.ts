@@ -41,8 +41,8 @@ export const sendChannelMessageHandler = async (
 
     channel.members.forEach((member: ChannelMember) => {
       if (member._id.toString() === socket.user.id) return;
-
       const receiver = ConnectedUsers.get(member._id.toString());
+
       if (receiver) {
         io.to(receiver.id).emit(NEW_CHANNEL_MESSAGE, {
           message: modifiedMessage,
