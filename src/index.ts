@@ -17,6 +17,7 @@ import searchRoutes from "./routes/search.routes.js";
 import channelRoutes from "./routes/channel.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import chatRequestRoutes from "./routes/chat-request.routes.js";
+import joinRequestRoutes from "./routes/join-request.routes.js";
 import followRequestRoutes from "./routes/follow-request.routes.js";
 
 const app = express();
@@ -44,6 +45,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/channel", channelRoutes);
 app.use("/api/chat-requests", chatRequestRoutes);
+app.use("/api/join-requests", joinRequestRoutes);
 app.use("/api/follow-requests", followRequestRoutes);
 
 server.listen(PORT, () => {
