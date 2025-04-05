@@ -11,18 +11,33 @@ export const sendChannelMessageHandler = async (io, socket, channel, content) =>
             status: "sent",
         });
         const savedMessage = await newMessage.save();
+        const modifiedMessage = {
+            _id: savedMessage._id.toString(),
+            channelId: channel._id,
+            attachment: savedMessage?.attachment,
+            content: savedMessage.content,
+            sentAt: savedMessage.sentAt,
+            sender: {
+                _id: socket.user.id,
+                firstName: socket.user.firstName,
+                lastName: socket.user.lastName,
+                username: socket.user.username,
+                profilePicture: socket.user.profilePicture,
+            },
+            status: savedMessage.status,
+        };
         channel.members.forEach((member) => {
             if (member._id.toString() === socket.user.id)
                 return;
             const receiver = ConnectedUsers.get(member._id.toString());
             if (receiver) {
                 io.to(receiver.id).emit(NEW_CHANNEL_MESSAGE, {
-                    message: savedMessage,
+                    message: modifiedMessage,
                     channel: channel,
                 });
             }
         });
-        socket.emit(CHANNEL_MESSAGE_SENT, { message: savedMessage });
+        socket.emit(CHANNEL_MESSAGE_SENT, { message: modifiedMessage });
     }
     catch (error) {
         console.error("Error sending message:", error);

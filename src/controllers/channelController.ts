@@ -359,13 +359,13 @@ export const getChannelMessages = async (
       channelId,
     })
       .populate(
-        "creatorId",
+        "sender",
         "_id firstName lastName username profilePicture coverImage"
       )
       .sort({ createdAt: -1 });
 
     if (!messages || messages.length === 0) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "No messages yet.",
       });
