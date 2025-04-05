@@ -138,3 +138,13 @@ interface JoinRequest {
   channelId: string;
   status: JoinRequestStatus;
 }
+
+interface ChannelMessage {
+  channelId: Types.ObjectId;
+  sender: Types.ObjectId;
+  content?: string;
+  attachment?: Attachment[];
+  sentAt?: Date;
+  status: "sent" | "delivered" | "failed";
+  deletedFor: Types.ObjectId[];
+}
