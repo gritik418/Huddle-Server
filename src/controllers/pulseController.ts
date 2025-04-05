@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Pulse from "../models/Pulse.js";
+import User from "../models/User.js";
 
 export const getAllPulses = async (
   req: Request,
@@ -16,11 +17,46 @@ export const getAllPulses = async (
       });
     }
 
-    const totalPulses = await Pulse.countDocuments();
+    const user: User | null = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    const blockedUserIds: string[] = user.blockedUsers.map((id: string) =>
+      id.toString()
+    );
+
+    const publicUsers = await User.find({
+      $or: [
+        { isPrivate: false },
+        { followers: { $in: [userId] } },
+        { _id: { $eq: userId } },
+      ],
+    }).select({
+      _id: 1,
+      blockedUsers: 1,
+    });
+
+    const publicUserIds: string[] = publicUsers
+      .filter(
+        (user) =>
+          !user.blockedUsers
+            .map((id: string) => id.toString())
+            .includes(userId.toString())
+      )
+      .map((user) => user._id.toString())
+      .filter((id: string) => !blockedUserIds.includes(id));
+
+    const totalPulses = await Pulse.countDocuments({
+      userId: { $in: publicUserIds },
+    });
 
     const totalPages = Math.ceil(totalPulses / +limit);
 
-    const pulses = await Pulse.find()
+    const pulses = await Pulse.find({ userId: { $in: publicUserIds } })
       .skip((+page - 1) * +limit)
       .limit(+limit)
       .populate(

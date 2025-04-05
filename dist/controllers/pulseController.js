@@ -1,4 +1,5 @@
 import Pulse from "../models/Pulse.js";
+import User from "../models/User.js";
 export const getAllPulses = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -9,9 +10,35 @@ export const getAllPulses = async (req, res) => {
                 message: "Please Login.",
             });
         }
-        const totalPulses = await Pulse.countDocuments();
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        const blockedUserIds = user.blockedUsers.map((id) => id.toString());
+        const publicUsers = await User.find({
+            $or: [
+                { isPrivate: false },
+                { followers: { $in: [userId] } },
+                { _id: { $eq: userId } },
+            ],
+        }).select({
+            _id: 1,
+            blockedUsers: 1,
+        });
+        const publicUserIds = publicUsers
+            .filter((user) => !user.blockedUsers
+            .map((id) => id.toString())
+            .includes(userId.toString()))
+            .map((user) => user._id.toString())
+            .filter((id) => !blockedUserIds.includes(id));
+        const totalPulses = await Pulse.countDocuments({
+            userId: { $in: publicUserIds },
+        });
         const totalPages = Math.ceil(totalPulses / +limit);
-        const pulses = await Pulse.find()
+        const pulses = await Pulse.find({ userId: { $in: publicUserIds } })
             .skip((+page - 1) * +limit)
             .limit(+limit)
             .populate("userId", "_id firstName lastName username coverImage profilePicture")

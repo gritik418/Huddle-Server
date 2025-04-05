@@ -214,6 +214,14 @@ export const getFeed = async (req, res) => {
                 message: "Please Login.",
             });
         }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        const blockedUserIds = user.blockedUsers.map((id) => id.toString());
         const publicUsers = await User.find({
             $or: [
                 { isPrivate: false },
@@ -222,8 +230,14 @@ export const getFeed = async (req, res) => {
             ],
         }).select({
             _id: 1,
+            blockedUsers: 1,
         });
-        const publicUserIds = publicUsers.map((user) => user._id.toString());
+        const publicUserIds = publicUsers
+            .filter((user) => !user.blockedUsers
+            .map((id) => id.toString())
+            .includes(userId.toString()))
+            .map((user) => user._id.toString())
+            .filter((id) => !blockedUserIds.includes(id));
         const totalPosts = await Post.countDocuments({
             userId: { $in: publicUserIds },
         });
