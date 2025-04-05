@@ -11,7 +11,6 @@ const ChannelMessageSchema = new Schema<ChannelMessage>(
       type: String,
     },
     attachment: [AttachmentSchema],
-
     sentAt: {
       type: Date,
     },

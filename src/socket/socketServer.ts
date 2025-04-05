@@ -7,12 +7,14 @@ import { Request, Response } from "express";
 import EventEmitter from "events";
 import jwt from "jsonwebtoken";
 import {
+  SEND_CHANNEL_MESSAGE,
   SEND_MESSAGE,
   STATUS_UPDATE,
   USER_ONLINE,
 } from "../constants/events.js";
 import { sendMessageHandler } from "./handlers/messageHandler.js";
 import User from "../models/User.js";
+import { sendChannelMessageHandler } from "./handlers/channelMessageHandler.js";
 
 export const SocketEventEmitter = new EventEmitter();
 export const ConnectedUsers = new Map<string, Socket>();
@@ -112,6 +114,10 @@ const socketServer = (
         await sendMessageHandler(io, socket, message, chat);
       }
     );
+
+    socket.on(SEND_CHANNEL_MESSAGE, async ({ content, channel }) => {
+      await sendChannelMessageHandler(io, socket, channel, content);
+    });
 
     socket.on("disconnect", async () => {
       ConnectedUsers.delete(socket.user.id);

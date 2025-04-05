@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/User.js";
 import Post from "../models/Post.js";
 import Channel from "../models/Channel.js";
+import mongoose from "mongoose";
 
 export const search = async (
   req: Request,
@@ -12,6 +13,23 @@ export const search = async (
     const { page = 1, limit = 20 } = req.query;
     const searchQuery: string = req.query["q"]?.toString() || "";
     const type: string = req.query["type"]?.toString() || "accounts";
+
+    const objectUserId = new mongoose.Types.ObjectId(userId);
+
+    const currentUser: Pick<User, "blockedUsers"> = await User.findById(
+      objectUserId
+    ).select("blockedUsers");
+
+    const blockedByMe =
+      currentUser?.blockedUsers.map((id: string) => id.toString()) || [];
+
+    const blockedMeUsers = await User.find({
+      blockedUsers: objectUserId,
+    }).select("_id");
+
+    const blockedMe = blockedMeUsers.map((u) => u._id);
+
+    const excludedUserIds = [...blockedByMe, ...blockedMe, objectUserId];
 
     switch (type) {
       case "accounts":
@@ -27,9 +45,8 @@ export const search = async (
               username: { $regex: searchQuery, $options: "i" },
             },
           ],
-          _id: { $ne: userId },
+          _id: { $nin: excludedUserIds },
           isVerified: true,
-          blockedUsers: { $ne: userId },
         });
 
         const totalPages = Math.ceil(totalUsers / +limit);
@@ -46,9 +63,8 @@ export const search = async (
               username: { $regex: searchQuery, $options: "i" },
             },
           ],
-          _id: { $ne: userId },
+          _id: { $nin: excludedUserIds },
           isVerified: true,
-          blockedUsers: { $ne: userId },
         })
           .select("_id firstName lastName username profilePicture")
           .skip((+page - 1) * +limit)
@@ -72,6 +88,7 @@ export const search = async (
             { followers: { $in: [userId] } },
             { userId: { $eq: userId } },
           ],
+          userId: { $nin: excludedUserIds },
           hashtags: {
             $elemMatch: { $regex: searchQuery, $options: "i" },
           },
@@ -85,6 +102,7 @@ export const search = async (
             { followers: { $in: [userId] } },
             { userId: { $eq: userId } },
           ],
+          userId: { $nin: excludedUserIds },
           hashtags: {
             $elemMatch: { $regex: searchQuery, $options: "i" },
           },

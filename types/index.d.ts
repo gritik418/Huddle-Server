@@ -148,3 +148,12 @@ interface ChannelMessage {
   status: "sent" | "delivered" | "failed";
   deletedFor: Types.ObjectId[];
 }
+
+interface ChannelMember {
+  _id: string;
+  firstName: string;
+  lastName?: string;
+  username: string;
+  profilePicture?: string;
+  coverImage?: string;
+}
