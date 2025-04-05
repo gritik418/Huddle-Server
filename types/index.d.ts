@@ -126,17 +126,11 @@ interface Channel {
   sendMessagePermission: "creator" | "members" | "everyone";
 }
 
-enum JoinRequestStatus {
-  PENDING = "pending",
-  ACCEPTED = "accepted",
-  REJECTED = "rejected",
-}
-
 interface JoinRequest {
   _id: Types.ObjectId;
-  userId: string;
-  channelId: string;
-  status: JoinRequestStatus;
+  userId: Types.ObjectId;
+  channelId: Types.ObjectId;
+  status: "pending" | "accepted" | "rejected";
 }
 
 interface ChannelMessage {
