@@ -119,3 +119,78 @@ export const getJoinRequests = async (
     });
   }
 };
+
+export const acceptJoinRequest = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const requestId: string = req.params.requestId;
+
+    if (!userId)
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+
+    if (!requestId)
+      return res.status(400).json({
+        success: false,
+        message: "Request Id is required.",
+      });
+
+    const joinRequest: JoinRequest | null = await JoinRequest.findById(
+      requestId
+    );
+
+    if (!joinRequest)
+      return res.status(400).json({
+        success: false,
+        message: "Join request does not exist or may have been removed.",
+      });
+
+    const channel: Channel | null = await Channel.findById(
+      joinRequest.channelId
+    );
+    if (!channel)
+      return res.status(400).json({
+        success: false,
+        message: "Channel not found.",
+      });
+
+    if (channel.creatorId.toString() !== userId) {
+      return res.status(400).json({
+        success: false,
+        message: "You’re not authorized to manage this channel.",
+      });
+    }
+
+    const memberIds: string[] = channel.members.map((id: string) =>
+      id.toString()
+    );
+
+    if (memberIds.includes(joinRequest.userId.toString())) {
+      return res.status(200).json({
+        success: true,
+        message: "User is already a member of this channel.",
+      });
+    }
+
+    await Channel.findByIdAndUpdate(channel._id, {
+      $push: { members: joinRequest.userId },
+    });
+
+    await JoinRequest.findByIdAndDelete(requestId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Join request accepted. User has been added to the channel.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
