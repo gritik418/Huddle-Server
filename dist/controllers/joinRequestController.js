@@ -62,3 +62,33 @@ export const sendJoinRequest = async (req, res) => {
         });
     }
 };
+export const getJoinRequests = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const channelId = req.params.channelId;
+        if (!userId)
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        if (!channelId)
+            return res.status(400).json({
+                success: false,
+                message: "Channel Id is required.",
+            });
+        const joinRequests = await JoinRequest.find({
+            channelId,
+            status: "pending",
+        }).populate("userId", "_id firstName lastName username profilePicture coverImage");
+        return res.status(200).json({
+            success: true,
+            joinRequests,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
