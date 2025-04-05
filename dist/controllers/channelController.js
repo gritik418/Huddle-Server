@@ -1,5 +1,6 @@
 import ChannelSchema from "../validators/channelSchema.js";
 import Channel from "../models/Channel.js";
+import ChannelMessage from "../models/ChannelMessage.js";
 export const getAllChannels = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -242,6 +243,45 @@ export const getChannelChats = async (req, res) => {
         return res.status(200).json({
             success: true,
             channels,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const getChannelMessages = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const channelId = req.params.channelId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        if (!channelId) {
+            return res.status(400).json({
+                success: false,
+                message: "Channel Id is required.",
+            });
+        }
+        const messages = await ChannelMessage.find({
+            channelId,
+        })
+            .populate("creatorId", "_id firstName lastName username profilePicture coverImage")
+            .sort({ createdAt: -1 });
+        if (!messages || messages.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No messages yet.",
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            messages,
         });
     }
     catch (error) {
