@@ -2,6 +2,7 @@ import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import {
   createChannel,
+  deleteChannel,
   getAllChannels,
   getChannelById,
   getChannelChats,
@@ -26,6 +27,8 @@ router.get("/created", authenticate, getCreatedChannels);
 router.get("/chats", authenticate, getChannelChats);
 
 router.get("/:channelId", authenticate, getChannelById);
+
+router.delete("/:channelId", authenticate, deleteChannel);
 
 router.get("/:channelId/messages", authenticate, getChannelMessages);
 

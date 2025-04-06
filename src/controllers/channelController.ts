@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ChannelSchema, { ChannelData } from "../validators/channelSchema.js";
 import Channel from "../models/Channel.js";
 import ChannelMessage from "../models/ChannelMessage.js";
+import JoinRequest from "../models/JoinRequest.js";
 
 export const getAllChannels = async (
   req: Request,
@@ -374,6 +375,60 @@ export const getChannelMessages = async (
     return res.status(200).json({
       success: true,
       messages,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const deleteChannel = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const channelId: string = req.params.channelId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!channelId) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel Id is required.",
+      });
+    }
+
+    const channel: Channel | null = await Channel.findById(channelId);
+
+    if (!channel) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel not found.",
+      });
+    }
+
+    if (channel.creatorId.toString() !== userId) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to delete this channel.",
+      });
+    }
+
+    await Channel.findByIdAndDelete(channelId);
+    await ChannelMessage.deleteMany({ channelId });
+    await JoinRequest.deleteMany({ channelId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Channel deleted successfully.",
     });
   } catch (error) {
     return res.status(500).json({
