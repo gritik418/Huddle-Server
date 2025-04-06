@@ -47,6 +47,25 @@ export const sendJoinRequest = async (
       });
     }
 
+    if (channel.type === "public") {
+      await Channel.findByIdAndUpdate(channel._id, {
+        $push: { members: userId },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Successfully joined the channel.",
+      });
+    }
+
+    if (channel.type === "invite-only") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This is an invite-only channel. You cannot join without an invite.",
+      });
+    }
+
     const existingRequest = await JoinRequest.findOne({
       channelId,
       userId,

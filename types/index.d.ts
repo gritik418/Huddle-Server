@@ -151,3 +151,15 @@ interface ChannelMember {
   profilePicture?: string;
   coverImage?: string;
 }
+
+interface Story {
+  _id: string;
+  userId: Follower;
+  mediaUrl?: string;
+  mediaType?: "image" | "video";
+  caption?: string;
+  createdAt: string;
+  expiresAt: string;
+  viewsCount?: number;
+  viewers?: string[];
+}
