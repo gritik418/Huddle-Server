@@ -193,3 +193,73 @@ export const acceptChannelInvite = async (
     });
   }
 };
+
+export const declineChannelInvite = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const inviteId: string = req.params.inviteId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!inviteId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invite id is required.",
+      });
+    }
+
+    const invite: ChannelInvite | null = await ChannelInvite.findById(inviteId);
+
+    if (!invite || invite.status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Invite expired.",
+      });
+    }
+
+    if (invite.receiverId.toString() !== userId) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to decline this invite.",
+      });
+    }
+
+    const channel: Channel | null = await Channel.findById(invite.channelId);
+    if (!channel)
+      return res.status(400).json({
+        success: false,
+        message: "Channel not found.",
+      });
+
+    const memberIds: string[] = channel.members.map((id: string) =>
+      id.toString()
+    );
+
+    if (memberIds.includes(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You are a member of this channel.",
+      });
+    }
+
+    await ChannelInvite.findByIdAndDelete(inviteId);
+
+    return res.status(200).json({
+      success: true,
+      message: "You have declined the invite.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
