@@ -52,6 +52,21 @@ export const sendFollowRequest = async (req, res) => {
                 success: false,
                 message: "User not found.",
             });
+        if (!receiver.isPrivate) {
+            await User.findByIdAndUpdate(userId, {
+                $push: { following: receiverId },
+            });
+            await User.findByIdAndUpdate(receiverId, {
+                $push: { followers: userId },
+            });
+            return res
+                .status(200)
+                .json({
+                success: true,
+                followingId: receiverId,
+                message: "Followed successfully.",
+            });
+        }
         const existingRequest = await FollowRequest.findOne({
             sender: userId,
             receiver: receiverId,

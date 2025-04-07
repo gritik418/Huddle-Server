@@ -10,6 +10,7 @@ import {
   getCreatedChannels,
   getJoinedChannels,
   getUserChannels,
+  removeMemberFromChannel,
 } from "../controllers/channelController.js";
 
 const router = Router();
@@ -31,5 +32,11 @@ router.get("/:channelId", authenticate, getChannelById);
 router.delete("/:channelId", authenticate, deleteChannel);
 
 router.get("/:channelId/messages", authenticate, getChannelMessages);
+
+router.delete(
+  "/:channelId/remove/:memberId",
+  authenticate,
+  removeMemberFromChannel
+);
 
 export default router;

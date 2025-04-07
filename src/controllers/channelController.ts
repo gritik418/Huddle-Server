@@ -437,3 +437,81 @@ export const deleteChannel = async (
     });
   }
 };
+
+export const removeMemberFromChannel = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const channelId: string = req.params.channelId;
+    const memberId: string = req.params.memberId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!channelId) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel Id is required.",
+      });
+    }
+
+    if (!memberId) {
+      return res.status(400).json({
+        success: false,
+        message: "Member Id is required.",
+      });
+    }
+
+    const channel: Channel | null = await Channel.findById(channelId);
+
+    if (!channel) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel not found.",
+      });
+    }
+
+    if (channel.creatorId.toString() !== userId) {
+      return res.status(401).json({
+        success: false,
+        message: "You are not authorized to remove any member.",
+      });
+    }
+
+    const memberIds = channel.members.map((memberId: string) =>
+      memberId.toString()
+    );
+
+    if (!memberIds.includes(memberId)) {
+      return res.status(401).json({
+        success: false,
+        message: "User is not a member of this channel.",
+      });
+    }
+
+    await Channel.findByIdAndUpdate(channelId, {
+      $pull: { members: memberId },
+    });
+
+    await ChannelMessage.deleteMany({
+      channelId,
+      sender: memberId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Member removed successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
