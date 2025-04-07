@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import {
+  acceptChannelInvite,
   getAllInvites,
   inviteMemberToChannel,
 } from "../controllers/channelInviteController.js";
@@ -14,5 +15,7 @@ router.post(
 );
 
 router.get("/", authenticate, getAllInvites);
+
+router.post("/:inviteId/accept", authenticate, acceptChannelInvite);
 
 export default router;
