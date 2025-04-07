@@ -133,6 +133,14 @@ interface JoinRequest {
   status: "pending" | "accepted" | "rejected";
 }
 
+interface ChannelInvite {
+  _id: Types.ObjectId;
+  receiverId: Types.ObjectId;
+  senderId: Types.ObjectId;
+  channelId: Types.ObjectId;
+  status: "pending" | "accepted" | "rejected";
+}
+
 interface ChannelMessage {
   channelId: Types.ObjectId;
   sender: Types.ObjectId;

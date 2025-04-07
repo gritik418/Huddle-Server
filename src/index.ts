@@ -18,6 +18,7 @@ import channelRoutes from "./routes/channel.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import chatRequestRoutes from "./routes/chat-request.routes.js";
 import joinRequestRoutes from "./routes/join-request.routes.js";
+import channelInviteRoutes from "./routes/channel-invite.routes.js";
 import followRequestRoutes from "./routes/follow-request.routes.js";
 
 const app = express();
@@ -46,6 +47,7 @@ app.use("/api/message", messageRoutes);
 app.use("/api/channel", channelRoutes);
 app.use("/api/chat-requests", chatRequestRoutes);
 app.use("/api/join-requests", joinRequestRoutes);
+app.use("/api/channel-invite", channelInviteRoutes);
 app.use("/api/follow-requests", followRequestRoutes);
 
 server.listen(PORT, () => {
