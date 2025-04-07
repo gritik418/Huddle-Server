@@ -79,3 +79,43 @@ export const inviteMemberToChannel = async (
     });
   }
 };
+
+export const getAllInvites = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    const invites = await ChannelInvite.find({
+      receiverId: userId,
+      status: "pending",
+    })
+      .populate(
+        "senderId",
+        "_id firstName lastName username profilePicture coverImage"
+      )
+      .populate(
+        "receiverId",
+        "_id firstName lastName username profilePicture coverImage"
+      )
+      .populate("channelId", "name description members type creatorId");
+
+    return res.status(200).json({
+      success: true,
+      invites,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
