@@ -59,6 +59,20 @@ export const inviteMemberToChannel = async (
       });
     }
 
+    const existingInvite = await ChannelInvite.findOne({
+      channelId,
+      receiverId,
+      senderId: userId,
+      status: "pending",
+    });
+
+    if (existingInvite) {
+      return res.status(400).json({
+        success: false,
+        message: "User already invited.",
+      });
+    }
+
     const channelInvite = new ChannelInvite({
       channelId,
       receiverId,

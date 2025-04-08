@@ -10,6 +10,7 @@ import {
   getCreatedChannels,
   getJoinedChannels,
   getUserChannels,
+  leaveChannel,
   removeMemberFromChannel,
 } from "../controllers/channelController.js";
 
@@ -38,5 +39,7 @@ router.delete(
   authenticate,
   removeMemberFromChannel
 );
+
+router.delete("/:channelId/leave", authenticate, leaveChannel);
 
 export default router;

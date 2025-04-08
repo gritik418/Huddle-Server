@@ -3,6 +3,7 @@ import ChannelSchema, { ChannelData } from "../validators/channelSchema.js";
 import Channel from "../models/Channel.js";
 import ChannelMessage from "../models/ChannelMessage.js";
 import JoinRequest from "../models/JoinRequest.js";
+import ChannelInvite from "../models/ChannelInvite.js";
 
 export const getAllChannels = async (
   req: Request,
@@ -425,6 +426,7 @@ export const deleteChannel = async (
     await Channel.findByIdAndDelete(channelId);
     await ChannelMessage.deleteMany({ channelId });
     await JoinRequest.deleteMany({ channelId });
+    await ChannelInvite.deleteMany({ channelId });
 
     return res.status(200).json({
       success: true,
@@ -507,6 +509,71 @@ export const removeMemberFromChannel = async (
     return res.status(200).json({
       success: true,
       message: "Member removed successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const leaveChannel = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const channelId: string = req.params.channelId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
+
+    if (!channelId) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel Id is required.",
+      });
+    }
+
+    const channel: Channel | null = await Channel.findById(channelId);
+
+    if (!channel) {
+      return res.status(400).json({
+        success: false,
+        message: "Channel not found.",
+      });
+    }
+
+    if (channel.creatorId.toString() === userId) {
+      return res.status(401).json({
+        success: false,
+        message: "You are the creator, you cannot leave the channel.",
+      });
+    }
+
+    const memberIds: string[] = channel.members.map((id: string) =>
+      id.toString()
+    );
+
+    if (!memberIds.includes(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "You are not a member of this channel.",
+      });
+    }
+
+    await Channel.findByIdAndUpdate(channelId, {
+      $pull: { members: userId },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Successfully left the channel.",
     });
   } catch (error) {
     return res.status(500).json({
