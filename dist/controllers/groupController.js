@@ -155,11 +155,12 @@ export const leaveGroup = async (req, res) => {
         if (isLastAdmin) {
             const remainingMembers = group.members.filter((member) => member.toString() !== userId);
             if (remainingMembers.length > 0) {
-                const newAdmin = remainingMembers[0];
+                const newAdmin = remainingMembers[0].toString();
                 await Chat.findByIdAndUpdate(groupId, {
-                    $set: { admins: [newAdmin] },
                     $pull: { members: userId, admins: userId },
-                    $push: { deletedFor: userId },
+                });
+                await Chat.findByIdAndUpdate(groupId, {
+                    $push: { deletedFor: userId, admins: newAdmin },
                 });
                 return res.status(200).json({
                     success: true,
@@ -198,6 +199,45 @@ export const leaveGroup = async (req, res) => {
         });
     }
     catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const updateGroupIcon = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const groupId = req.params.groupId;
+        const group = await Chat.findById(groupId);
+        if (!group)
+            return res.status(400).json({
+                success: false,
+                message: "Group doesn't exists.",
+            });
+        const isAdmin = group.admins?.some((admin) => admin.toString() === userId);
+        if (!isAdmin)
+            return res.status(400).json({
+                success: false,
+                message: "Only admin can change group icon.",
+            });
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "No icon file uploaded.",
+            });
+        }
+        const groupIcon = `${process.env.BASE_URL}/uploads/${userId}/group/icons/${req.file.filename}`;
+        await Chat.findByIdAndUpdate(groupId, {
+            $set: { groupIcon },
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Group icon updated successfully.",
+        });
+    }
+    catch (error) {
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Unexpected server error. Please try again later.",

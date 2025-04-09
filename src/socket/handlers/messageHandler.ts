@@ -40,6 +40,7 @@ export const sendMessageHandler = async (
         profilePicture: socket.user.profilePicture,
       },
       status: savedMessage.status,
+      updatedAt: Date.now(),
     };
 
     chat.members.forEach((memberId) => {

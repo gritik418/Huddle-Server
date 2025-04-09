@@ -210,12 +210,14 @@ export const leaveGroup = async (
       );
 
       if (remainingMembers.length > 0) {
-        const newAdmin = remainingMembers[0];
+        const newAdmin = remainingMembers[0].toString();
 
         await Chat.findByIdAndUpdate(groupId, {
-          $set: { admins: [newAdmin] },
           $pull: { members: userId, admins: userId },
-          $push: { deletedFor: userId },
+        });
+
+        await Chat.findByIdAndUpdate(groupId, {
+          $push: { deletedFor: userId, admins: newAdmin },
         });
 
         return res.status(200).json({
@@ -255,6 +257,58 @@ export const leaveGroup = async (
       message: "You have successfully left the group.",
     });
   } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const updateGroupIcon = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const groupId: string = req.params.groupId;
+
+    const group: Chat | null = await Chat.findById(groupId);
+
+    if (!group)
+      return res.status(400).json({
+        success: false,
+        message: "Group doesn't exists.",
+      });
+
+    const isAdmin = group.admins?.some(
+      (admin: string) => admin.toString() === userId
+    );
+
+    if (!isAdmin)
+      return res.status(400).json({
+        success: false,
+        message: "Only admin can change group icon.",
+      });
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No icon file uploaded.",
+      });
+    }
+
+    const groupIcon = `${process.env.BASE_URL}/uploads/${userId}/group/icons/${req.file.filename}`;
+
+    await Chat.findByIdAndUpdate(groupId, {
+      $set: { groupIcon },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Group icon updated successfully.",
+    });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Unexpected server error. Please try again later.",

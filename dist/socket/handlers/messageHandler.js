@@ -32,6 +32,7 @@ export const sendMessageHandler = async (io, socket, message, chat) => {
                 profilePicture: socket.user.profilePicture,
             },
             status: savedMessage.status,
+            updatedAt: Date.now(),
         };
         chat.members.forEach((memberId) => {
             if (memberId.toString() === socket.user.id)

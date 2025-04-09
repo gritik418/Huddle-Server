@@ -17,9 +17,10 @@ export const getChats = async (
 
     const chats: Chat[] = await Chat.find({
       members: { $in: [userId] },
+      deletedFor: { $nin: [userId] },
     })
       .populate("members", "_id firstName lastName username profilePicture")
-      .populate("lastMessage", "content sender")
+      .populate("lastMessage", "content sender updatedAt")
       .sort({ updatedAt: -1 });
 
     return res.status(200).json({

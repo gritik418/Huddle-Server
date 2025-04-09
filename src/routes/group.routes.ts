@@ -5,6 +5,7 @@ import {
   deleteGroup,
   getGroupById,
   leaveGroup,
+  updateGroupIcon,
 } from "../controllers/groupController.js";
 import { uploadGroupIcon } from "../config/multerConfig.js";
 import multer from "multer";
@@ -47,6 +48,45 @@ router.post("/", authenticate, function (req: Request, res: Response) {
     createGroup(req, res);
   });
 });
+
+router.patch(
+  "/:groupId/icon",
+  authenticate,
+  function (req: Request, res: Response) {
+    uploadGroupIcon(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        switch (err.code) {
+          case "LIMIT_FILE_SIZE":
+            return res.status(400).json({
+              success: false,
+              message: "File size is too large.",
+            });
+          case "LIMIT_FILE_COUNT":
+            return res.status(400).json({
+              success: false,
+              message: "Too many files uploaded.",
+            });
+          case "LIMIT_UNEXPECTED_FILE":
+            return res.status(400).json({
+              success: false,
+              message: "Unexpected file field.",
+            });
+          default:
+            return res.status(400).json({
+              success: false,
+              message: "An error occurred during the file upload.",
+            });
+        }
+      } else if (err instanceof Error) {
+        return res.status(400).json({
+          success: false,
+          message: err.message,
+        });
+      }
+      updateGroupIcon(req, res);
+    });
+  }
+);
 
 router.delete("/:groupId", authenticate, deleteGroup);
 
