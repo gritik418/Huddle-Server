@@ -1,5 +1,10 @@
 import Story from "../models/Story.js";
 import User from "../models/User.js";
+import fs from "fs";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 export const getOwnStories = async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -9,11 +14,18 @@ export const getOwnStories = async (req, res) => {
                 message: "Please login.",
             });
         }
+        const user = await User.findById(userId).select("_id firstName lastName username profilePicture");
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
         const stories = await Story.find({
             userId,
             expiresAt: { $gt: new Date() },
         })
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .populate("viewers", "_id firstName lastName username profilePicture");
         return res.status(200).json({
             success: true,
@@ -47,11 +59,30 @@ export const getFollowingsStories = async (req, res) => {
             userId: { $in: user.following },
             expiresAt: { $gt: new Date() },
         })
-            .sort({ createdAt: -1 })
+            .sort({ createdAt: 1 })
             .populate("userId", "_id firstName lastName username profilePicture");
+        const grouped = {};
+        stories.forEach((story) => {
+            const user = story.userId;
+            if (!grouped[user._id]) {
+                grouped[user._id] = {
+                    user,
+                    stories: [],
+                };
+            }
+            grouped[user._id].stories.push({
+                _id: story._id,
+                caption: story.caption,
+                mediaUrl: story.mediaUrl,
+                mediaType: story.mediaType,
+                createdAt: story.createdAt,
+                expiresAt: story.expiresAt,
+            });
+        });
+        const groupedStories = Object.values(grouped);
         return res.status(200).json({
             success: true,
-            stories,
+            stories: groupedStories,
         });
     }
     catch (error) {
@@ -92,6 +123,54 @@ export const addStory = async (req, res) => {
         });
     }
     catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
+export const deleteStory = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const storyId = req.params.storyId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login.",
+            });
+        }
+        if (!storyId) {
+            return res.status(400).json({
+                success: false,
+                message: "Story Id is required.",
+            });
+        }
+        const story = await Story.findById(storyId);
+        if (!story)
+            return res.status(400).json({
+                success: false,
+                message: "Story not found.",
+            });
+        if (story.userId.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized to delete this story.",
+            });
+        }
+        if (story.mediaUrl) {
+            const filePath = path.join(__dirname, "../../public", story?.mediaUrl.replace(/^.*\/uploads/, "uploads"));
+            fs.promises.unlink(filePath).catch((err) => {
+                console.warn("File deletion failed or not found:", err.message);
+            });
+        }
+        await Story.findByIdAndDelete(storyId);
+        return res.status(200).json({
+            success: true,
+            message: "Story deleted successfully.",
+        });
+    }
+    catch (error) {
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Unexpected server error. Please try again later.",

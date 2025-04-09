@@ -4,6 +4,7 @@ import { uploadStory } from "../config/multerConfig.js";
 import multer from "multer";
 import {
   addStory,
+  deleteStory,
   getFollowingsStories,
   getOwnStories,
 } from "../controllers/storyController.js";
@@ -39,5 +40,7 @@ router.post("/", authenticate, function (req: Request, res: Response) {
 router.get("/me", authenticate, getOwnStories);
 
 router.get("/followings", authenticate, getFollowingsStories);
+
+router.delete("/:storyId", authenticate, deleteStory);
 
 export default router;
