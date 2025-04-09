@@ -10,10 +10,21 @@ export const getFollowingsStories = async (req, res) => {
             });
         }
         const user = await User.findById(userId).select("following");
-        console.log(user);
-        return res.status(201).json({
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Login.",
+            });
+        }
+        const stories = await Story.find({
+            userId: { $in: user.following },
+            expiresAt: { $gt: new Date() },
+        })
+            .sort({ createdAt: -1 })
+            .populate("userId", "_id firstName lastName username profilePicture");
+        return res.status(200).json({
             success: true,
-            message: "Story added successfully.",
+            stories,
         });
     }
     catch (error) {

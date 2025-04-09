@@ -17,12 +17,23 @@ export const getFollowingsStories = async (
     }
 
     const user: User | null = await User.findById(userId).select("following");
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Please Login.",
+      });
+    }
 
-    console.log(user);
+    const stories = await Story.find({
+      userId: { $in: user.following },
+      expiresAt: { $gt: new Date() },
+    })
+      .sort({ createdAt: -1 })
+      .populate("userId", "_id firstName lastName username profilePicture");
 
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: "Story added successfully.",
+      stories,
     });
   } catch (error) {
     return res.status(500).json({
