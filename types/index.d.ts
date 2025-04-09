@@ -162,12 +162,12 @@ interface ChannelMember {
 
 interface Story {
   _id: string;
-  userId: Follower;
+  userId: Types.ObjectId;
   mediaUrl?: string;
   mediaType?: "image" | "video";
   caption?: string;
   createdAt: string;
-  expiresAt: string;
+  expiresAt: Date;
   viewsCount?: number;
-  viewers?: string[];
+  viewers?: Types.ObjectId[];
 }

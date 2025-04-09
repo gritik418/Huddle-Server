@@ -5,6 +5,7 @@ import { Socket } from "socket.io";
 import { ConnectedUsers } from "../socket/socketServer.js";
 import { ADDED_TO_GROUP } from "../constants/events.js";
 import User from "../models/User.js";
+import Message from "../models/Message.js";
 
 export const getGroupById = async (
   req: Request,
@@ -144,21 +145,8 @@ export const deleteGroup = async (
         message: "Only Group Admin can delete the group.",
       });
 
-    if (group.groupStatus === "deleted") {
-      return res.status(400).json({
-        success: false,
-        message: "Group has already been deleted.",
-      });
-    }
-
-    await Chat.findByIdAndUpdate(groupId, {
-      $set: {
-        deletedAt: Date.now(),
-        deletedBy: userId,
-        groupStatus: "deleted",
-      },
-      $push: { deletedFor: userId },
-    });
+    await Chat.findByIdAndDelete(groupId);
+    await Message.deleteMany({ chatId: groupId });
 
     return res.status(200).json({
       success: true,
