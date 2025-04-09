@@ -308,7 +308,49 @@ export const updateGroupIcon = async (
       message: "Group icon updated successfully.",
     });
   } catch (error) {
-    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const updateGroupInfo = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId: string = req.params.userId;
+    const groupId: string = req.params.groupId;
+    const { groupName, groupDescription } = req.body;
+
+    const group: Chat | null = await Chat.findById(groupId);
+
+    if (!group)
+      return res.status(400).json({
+        success: false,
+        message: "Group doesn't exists.",
+      });
+
+    const isAdmin = group.admins?.some(
+      (admin: string) => admin.toString() === userId
+    );
+
+    if (!isAdmin)
+      return res.status(400).json({
+        success: false,
+        message: "Only admin can change group name or description.",
+      });
+
+    await Chat.findByIdAndUpdate(groupId, {
+      $set: { groupName, groupDescription },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Group information updated successfully.",
+    });
+  } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Unexpected server error. Please try again later.",

@@ -6,6 +6,7 @@ import {
   getGroupById,
   leaveGroup,
   updateGroupIcon,
+  updateGroupInfo,
 } from "../controllers/groupController.js";
 import { uploadGroupIcon } from "../config/multerConfig.js";
 import multer from "multer";
@@ -87,6 +88,8 @@ router.patch(
     });
   }
 );
+
+router.patch("/:groupId/info", authenticate, updateGroupInfo);
 
 router.delete("/:groupId", authenticate, deleteGroup);
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
-import { createGroup, deleteGroup, getGroupById, leaveGroup, updateGroupIcon, } from "../controllers/groupController.js";
+import { createGroup, deleteGroup, getGroupById, leaveGroup, updateGroupIcon, updateGroupInfo, } from "../controllers/groupController.js";
 import { uploadGroupIcon } from "../config/multerConfig.js";
 import multer from "multer";
 const router = Router();
@@ -75,6 +75,7 @@ router.patch("/:groupId/icon", authenticate, function (req, res) {
         updateGroupIcon(req, res);
     });
 });
+router.patch("/:groupId/info", authenticate, updateGroupInfo);
 router.delete("/:groupId", authenticate, deleteGroup);
 router.put("/leave/:groupId", authenticate, leaveGroup);
 export default router;
