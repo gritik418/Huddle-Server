@@ -1,5 +1,32 @@
 import Story from "../models/Story.js";
 import User from "../models/User.js";
+export const getOwnStories = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login.",
+            });
+        }
+        const stories = await Story.find({
+            userId,
+            expiresAt: { $gt: new Date() },
+        })
+            .sort({ createdAt: -1 })
+            .populate("viewers", "_id firstName lastName username profilePicture");
+        return res.status(200).json({
+            success: true,
+            stories,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unexpected server error. Please try again later.",
+        });
+    }
+};
 export const getFollowingsStories = async (req, res) => {
     try {
         const userId = req.params.userId;

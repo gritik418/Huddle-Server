@@ -5,6 +5,7 @@ import multer from "multer";
 import {
   addStory,
   getFollowingsStories,
+  getOwnStories,
 } from "../controllers/storyController.js";
 
 const router = Router();
@@ -34,6 +35,8 @@ router.post("/", authenticate, function (req: Request, res: Response) {
     addStory(req, res);
   });
 });
+
+router.get("/me", authenticate, getOwnStories);
 
 router.get("/followings", authenticate, getFollowingsStories);
 

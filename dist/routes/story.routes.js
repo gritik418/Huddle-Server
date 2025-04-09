@@ -2,7 +2,7 @@ import { Router } from "express";
 import authenticate from "../middlewares/authenticate.js";
 import { uploadStory } from "../config/multerConfig.js";
 import multer from "multer";
-import { addStory, getFollowingsStories, } from "../controllers/storyController.js";
+import { addStory, getFollowingsStories, getOwnStories, } from "../controllers/storyController.js";
 const router = Router();
 router.post("/", authenticate, function (req, res) {
     uploadStory(req, res, function (err) {
@@ -26,5 +26,6 @@ router.post("/", authenticate, function (req, res) {
         addStory(req, res);
     });
 });
+router.get("/me", authenticate, getOwnStories);
 router.get("/followings", authenticate, getFollowingsStories);
 export default router;
