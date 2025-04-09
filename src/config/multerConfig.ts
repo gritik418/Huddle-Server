@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const userStorage = multer.diskStorage({
-  destination: async function (req, file, cb) {
+  destination: function (req, file, cb) {
     const userId = req.params.userId;
     let destinationPath;
 
@@ -31,39 +31,37 @@ const userStorage = multer.diskStorage({
       );
     }
 
-    try {
-      await fs.promises.rm(destinationPath, { recursive: true, force: true });
-      await fs.promises.mkdir(destinationPath, { recursive: true });
-
-      cb(null, destinationPath);
-    } catch (err) {
-      cb(new Error("Error while handling the file upload directory."), "");
-    }
+    fs.promises
+      .rm(destinationPath, { recursive: true, force: true })
+      .then(() => fs.promises.mkdir(destinationPath, { recursive: true }))
+      .then(() => cb(null, destinationPath))
+      .catch(() =>
+        cb(new Error("Error while handling the file upload directory."), "")
+      );
   },
   filename: function (req, file, cb) {
-    const filename = file.originalname;
-    cb(null, filename);
+    cb(null, file.originalname);
   },
 });
 
 const groupIconStorage = multer.diskStorage({
-  destination: async function (req, file, cb) {
+  destination: function (req, file, cb) {
     const userId = req.params.userId;
     const destinationPath = path.join(
       __dirname,
       "../../public/uploads/",
       userId,
-      "/group/icons"
+      "/group",
+      "/icons"
     );
 
-    try {
-      await fs.promises.rm(destinationPath, { recursive: true, force: true });
-      await fs.promises.mkdir(destinationPath, { recursive: true });
-
-      cb(null, destinationPath);
-    } catch (err) {
-      cb(new Error("Error while handling the file upload directory."), "");
-    }
+    fs.promises
+      .rm(destinationPath, { recursive: true, force: true })
+      .then(() => fs.promises.mkdir(destinationPath, { recursive: true }))
+      .then(() => cb(null, destinationPath))
+      .catch(() =>
+        cb(new Error("Error while handling the file upload directory."), "")
+      );
   },
   filename: function (req, file, cb) {
     const filename = `${Date.now()}-${file.originalname}`;
@@ -74,7 +72,6 @@ const groupIconStorage = multer.diskStorage({
 const postMediaStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const userId = req.params.userId;
-
     const destinationPath = path.join(
       __dirname,
       "../../public/uploads/",
@@ -83,13 +80,34 @@ const postMediaStorage = multer.diskStorage({
     );
 
     fs.mkdirSync(destinationPath, { recursive: true });
-
     cb(null, destinationPath);
   },
   filename: function (req, file, cb) {
     const extName = extname(file.originalname);
     const filename = `${Date.now()}-${file.fieldname}${extName}`;
+    cb(null, filename);
+  },
+});
 
+const storyStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const userId = req.params.userId;
+    const destinationPath = path.join(
+      __dirname,
+      "../../public/uploads/",
+      userId,
+      "/story"
+    );
+
+    fs.promises
+      .mkdir(destinationPath, { recursive: true })
+      .then(() => cb(null, destinationPath))
+      .catch(() =>
+        cb(new Error("Error while handling the file upload directory."), "")
+      );
+  },
+  filename: function (req, file, cb) {
+    const filename = `${Date.now()}-${file.originalname}`;
     cb(null, filename);
   },
 });
@@ -122,3 +140,12 @@ export const uploadUserAvatarOrCoverImage = multer({
   { name: "profilePicture", maxCount: 1 },
   { name: "coverImage", maxCount: 1 },
 ]);
+
+export const uploadStory = multer({
+  storage: storyStorage,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: postMediaFileFilter,
+}).single("storyMedia");
