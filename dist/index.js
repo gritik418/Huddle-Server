@@ -4,6 +4,7 @@ import express from "express";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+import "./config/passportConfig.js";
 import { corsOptions } from "./constants/options.js";
 import connectDB from "./database/index.js";
 import socketServer from "./socket/socketServer.js";
