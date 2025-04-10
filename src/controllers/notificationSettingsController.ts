@@ -35,3 +35,51 @@ export const getUserNotificationSettings = async (
     });
   }
 };
+
+export const updateSingleNotificationSetting = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId = req.params.userId;
+    const { settingKey } = req.params;
+    const { value } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const validKeys = [
+      "allowChatRequestNotification",
+      "allowNewMessageNotification",
+      "allowNewGroupNotification",
+      "allowFollowRequestNotification",
+      "allowAddedToGroupNotification",
+      "allowNewMentionNotification",
+      "allowNewChannelMessageNotification",
+      "allowAcceptedFollowRequestNotification",
+    ];
+
+    if (!validKeys.includes(settingKey)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid notification setting key.",
+      });
+    }
+
+    await NotificationSettings.findOneAndUpdate(
+      { userId },
+      { $set: { [settingKey]: value } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Settings updated successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error. Please try again later.",
+    });
+  }
+};
