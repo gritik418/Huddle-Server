@@ -172,3 +172,15 @@ interface Story {
   viewsCount?: number;
   viewers?: Types.ObjectId[];
 }
+
+interface NotificationSettings {
+  userId: Types.ObjectId;
+  allowChatRequestNotification: boolean;
+  allowNewMessageNotification: boolean;
+  allowNewGroupNotification: boolean;
+  allowFollowRequestNotification: boolean;
+  allowAddedToGroupNotification: boolean;
+  allowNewMentionNotification: boolean;
+  allowNewChannelMessageNotification: boolean;
+  allowAcceptedFollowRequestNotification: boolean;
+}

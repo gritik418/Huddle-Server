@@ -21,6 +21,7 @@ import chatRequestRoutes from "./routes/chat-request.routes.js";
 import joinRequestRoutes from "./routes/join-request.routes.js";
 import channelInviteRoutes from "./routes/channel-invite.routes.js";
 import followRequestRoutes from "./routes/follow-request.routes.js";
+import notificationSettingsRoutes from "./routes/notification-settings.routes.js";
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT;
@@ -47,6 +48,7 @@ app.use("/api/chat-requests", chatRequestRoutes);
 app.use("/api/join-requests", joinRequestRoutes);
 app.use("/api/channel-invite", channelInviteRoutes);
 app.use("/api/follow-requests", followRequestRoutes);
+app.use("/api/notification-settings", notificationSettingsRoutes);
 server.listen(PORT, () => {
     console.log(`App served at: http://localhost:${PORT}`);
 });

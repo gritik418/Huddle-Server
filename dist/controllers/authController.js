@@ -8,6 +8,7 @@ import loginSchema from "../validators/loginSchema.js";
 import { HUDDLE_TOKEN } from "../constants/variables.js";
 import { cookieOptions } from "../constants/options.js";
 import jwt from "jsonwebtoken";
+import NotificationSettings from "../models/NotificationSettings.js";
 export const userSignup = async (req, res) => {
     try {
         const data = req.body;
@@ -176,6 +177,10 @@ export const verifyEmail = async (req, res) => {
                 isVerified: true,
             },
         });
+        const notification = new NotificationSettings({
+            userId: user._id,
+        });
+        await notification.save();
         const payload = {
             id: user._id,
             email: user.email,

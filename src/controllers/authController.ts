@@ -10,6 +10,7 @@ import loginSchema, { LoginData } from "../validators/loginSchema.js";
 import { HUDDLE_TOKEN } from "../constants/variables.js";
 import { cookieOptions } from "../constants/options.js";
 import jwt from "jsonwebtoken";
+import NotificationSettings from "../models/NotificationSettings.js";
 
 export const userSignup = async (
   req: Request,
@@ -218,6 +219,12 @@ export const verifyEmail = async (
         isVerified: true,
       },
     });
+
+    const notification = new NotificationSettings({
+      userId: user._id,
+    });
+
+    await notification.save();
 
     const payload: JWT_Payload = {
       id: user._id,
