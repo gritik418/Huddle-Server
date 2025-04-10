@@ -45,6 +45,7 @@ export const search = async (
               username: { $regex: searchQuery, $options: "i" },
             },
           ],
+          isDeactivated: false,
           _id: { $nin: excludedUserIds },
           isVerified: true,
         });

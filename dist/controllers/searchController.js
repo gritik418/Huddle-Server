@@ -30,6 +30,7 @@ export const search = async (req, res) => {
                             username: { $regex: searchQuery, $options: "i" },
                         },
                     ],
+                    isDeactivated: false,
                     _id: { $nin: excludedUserIds },
                     isVerified: true,
                 });

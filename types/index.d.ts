@@ -19,6 +19,7 @@ interface User {
   following: Types.ObjectId[];
   blockedUsers: Types.ObjectId[];
   posts: Types.ObjectId[];
+  isDeactivated: boolean;
   verificationCode?: string;
   verificationCodeExpiry?: Date;
   passwordResetToken?: string;

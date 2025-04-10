@@ -98,6 +98,10 @@ const UserSchema = new Schema({
     passwordResetTokenExpiry: {
         type: Date,
     },
+    isDeactivated: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 export default User;

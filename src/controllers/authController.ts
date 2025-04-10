@@ -152,6 +152,10 @@ export const userLogin = async (
         message: "Invalid credentials.",
       });
 
+    await User.findByIdAndUpdate(user._id, {
+      $set: { isDeactivated: false },
+    });
+
     const payload: JWT_Payload = {
       id: user._id,
       email: user.email,
@@ -243,6 +247,43 @@ export const userLogout = async (
     return res.status(200).clearCookie(HUDDLE_TOKEN, cookieOptions).json({
       success: true,
       message: "Logged out successfully.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected server error. Please try again later.",
+    });
+  }
+};
+
+export const deactivateAccount = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. User not found.",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { isDeactivated: true });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    res.clearCookie(HUDDLE_TOKEN, cookieOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "Account deactivated and logged out successfully.",
     });
   } catch (error) {
     return res.status(500).json({

@@ -1,5 +1,6 @@
 import { HUDDLE_TOKEN } from "../constants/variables.js";
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 const authenticate = async (req, res, next) => {
     try {
         const token = req.cookies[HUDDLE_TOKEN];
@@ -14,6 +15,15 @@ const authenticate = async (req, res, next) => {
                 success: false,
                 message: "Please Login.",
             });
+        const user = await User.findById(verify.id);
+        if (!user)
+            throw new Error("User not found");
+        if (user.isDeactivated) {
+            return res.status(403).json({
+                success: false,
+                message: "Your account has been deactivated. Please login to reactivate.",
+            });
+        }
         req.params.userId = verify.id;
         next();
     }

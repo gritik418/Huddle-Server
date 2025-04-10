@@ -100,6 +100,10 @@ const UserSchema = new Schema<User>(
     passwordResetTokenExpiry: {
       type: Date,
     },
+    isDeactivated: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

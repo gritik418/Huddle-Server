@@ -27,6 +27,18 @@ const authenticate = async (
         message: "Please Login.",
       });
 
+    const user: User | null = await User.findById(verify.id);
+
+    if (!user) throw new Error("User not found");
+
+    if (user.isDeactivated) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Your account has been deactivated. Please login to reactivate.",
+      });
+    }
+
     req.params.userId = verify.id;
     next();
   } catch (error) {
