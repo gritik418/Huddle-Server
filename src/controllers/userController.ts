@@ -278,8 +278,8 @@ export const updateUser = async (
     } = {};
 
     if (firstName) updateData.firstName = firstName;
-    if (lastName) updateData.lastName = lastName;
     if (bio) updateData.bio = bio;
+    updateData.lastName = lastName || "";
 
     if (username) {
       const checkExisting = await User.findOne({
